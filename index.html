@@ -6,6 +6,12 @@
 <meta name="theme-color" content="#05030f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Ricochet: Neon Grid</title>
+<meta name="description" content="Ricochet: Neon Grid is a cyberpunk arcade roguelite. Bank discs off the walls, hold the firewall, evolve your build and take down the bosses.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305030f'/%3E%3Cpath d='M10 52L25 16l14 26 13-30' fill='none' stroke='%23ff2bd6' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='52' cy='12' r='6.5' fill='%2322f3ff'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ricochet: Neon Grid">
+<meta property="og:description" content="Ricochet: Neon Grid is a cyberpunk arcade roguelite. Bank discs off the walls, hold the firewall, evolve your build and take down the bosses.">
+<meta name="twitter:card" content="summary">
 <style>
 /* Orbitron, Rajdhani, Exo 2: SIL Open Font License 1.1, embedded so the game makes no external requests.
    Exo 2 covers Cyrillic + Turkish; Chinese uses the system CJK font. */
@@ -187,6 +193,16 @@ h2.cy{text-shadow:0 0 12px var(--cyan),0 0 40px var(--cyan)}
 @keyframes bought{0%{background:rgba(125,255,77,.28);border-color:#7dff4d;box-shadow:0 0 34px rgba(125,255,77,.6)}100%{}}
 @keyframes ubpop{0%{transform:scale(1.4)}100%{transform:none}}
 .crs.spent{animation:ubpop .45s cubic-bezier(.2,1.6,.4,1)}
+/* volume sliders */
+.vols{display:flex;flex-direction:column;gap:10px;width:min(86vw,360px)}.vols:empty{display:none}
+.vol{display:grid;grid-template-columns:minmax(70px,auto) 1fr 40px;align-items:center;gap:12px;font-family:var(--fd);font-size:10px;letter-spacing:.16em;color:var(--dim)}
+.vol output{text-align:right;color:#fff;font-size:11px}
+.vol input{-webkit-appearance:none;appearance:none;width:100%;height:4px;margin:10px 0;background:linear-gradient(90deg,var(--cyan) var(--p,100%),rgba(255,255,255,.12) var(--p,100%));outline:none;cursor:pointer;touch-action:none}
+.vol input::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 0 10px var(--cyan),0 0 0 3px rgba(34,243,255,.35)}
+.vol input::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 10px var(--cyan)}
+.vol input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 14px var(--cyan),0 0 0 4px #fff}
+/* reduced motion (system setting or LESS FLASH): stop decorative CSS loops */
+html.calm .logo::before,html.calm .logo::after,html.calm .rays::before,html.calm .record,html.calm .daily,html.calm .alert,html.calm .card[data-r]::after,html.calm .pips i.nx{animation:none!important}
 .unl{font-family:var(--fd);font-size:11px;letter-spacing:.12em;color:#7dff4d;text-shadow:0 0 10px #7dff4d;text-align:center;line-height:1.7;max-width:92vw}
 .unl>div,.newskin.rv{opacity:0;animation:unlIn .45s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes unlIn{from{opacity:0;transform:translateY(8px) scale(.85)}to{opacity:1;transform:none}}
@@ -229,7 +245,8 @@ h2.cy{text-shadow:0 0 12px var(--cyan),0 0 40px var(--cyan)}
     <button class="btn primary" id="bResume" data-i18n="resume">RESUME</button>
     <button class="btn" id="bRestart" data-i18n="restart">RESTART RUN</button>
     <button class="btn mag" id="bQuit" data-i18n="mainMenu">MAIN MENU</button>
-    <div class="row"><button class="tog" id="tMusic2">MUSIC</button><button class="tog" id="tSfx2">SFX</button><button class="tog" id="tFx2">FX HIGH</button><button class="tog" id="tDmg2">DMG #</button><button class="tog" id="tCalm2">LESS FLASH</button></div>
+    <div class="row"><button class="tog" id="tMusic2">MUSIC</button><button class="tog" id="tSfx2">SFX</button><button class="tog" id="tFx2">FX HIGH</button><button class="tog" id="tDmg2">DMG #</button><button class="tog" id="tCalm2">LESS FLASH</button><button class="tog" id="tCb2">COLORBLIND</button></div>
+    <div class="vols" id="vols2"></div>
   </section>
   <section id="sOver" class="screen hidden">
     <h2 class="red" id="overTitle" data-i18n="signalLost">SIGNAL LOST</h2>
@@ -256,7 +273,8 @@ h2.cy{text-shadow:0 0 12px var(--cyan),0 0 40px var(--cyan)}
     <h2 class="cy" data-i18n="settings">SETTINGS</h2>
     <div class="ctitle" data-i18n="language">LANGUAGE</div>
     <div class="row" id="langRow"></div>
-    <div class="row"><button class="tog" id="tMusic">MUSIC</button><button class="tog" id="tSfx">SFX</button><button class="tog" id="tFx">FX HIGH</button><button class="tog" id="tDmg">DMG #</button><button class="tog" id="tCalm">LESS FLASH</button></div>
+    <div class="row"><button class="tog" id="tMusic">MUSIC</button><button class="tog" id="tSfx">SFX</button><button class="tog" id="tFx">FX HIGH</button><button class="tog" id="tDmg">DMG #</button><button class="tog" id="tCalm">LESS FLASH</button><button class="tog" id="tCb">COLORBLIND</button></div>
+    <div class="vols" id="vols"></div>
     <div class="hint" data-i18n-html="setHint"><em>Aim</em> with mouse, drag or ←/→ · discs fire automatically<br><em>Pulse</em>: SPACE or tap ◉ · <em>Pause</em>: P / ESC · level-up cards: 1 / 2 / 3</div>
     <button class="btn" id="bSetBack" data-i18n="back">BACK</button>
   </section>
@@ -296,7 +314,7 @@ en:{ui:{
  hint:'<em>Aim</em> with mouse or drag · discs fire automatically<br><em>Bank shots</em> off the walls · hold the <em>firewall</em> · <em>SPACE</em>/tap ◉ to Pulse',
  setHint:'<em>Aim</em> with mouse, drag or ←/→ · discs fire automatically<br><em>Pulse</em>: SPACE or tap ◉ · <em>Pause</em>: P / ESC · level-up cards: 1 / 2 / 3',
  levelUp:'LEVEL UP',selectAug:'SELECT AUGMENT',reroll:'REROLL',paused:'PAUSED',resume:'RESUME',restart:'RESTART RUN',mainMenu:'MAIN MENU',
- music:'MUSIC',sfx:'SFX',fxHigh:'FX HIGH',fxLow:'FX LOW',dmgNums:'DMG #',lessFlash:'LESS FLASH',
+ music:'MUSIC',sfx:'SFX',fxHigh:'FX HIGH',fxLow:'FX LOW',dmgNums:'DMG #',lessFlash:'LESS FLASH',cbMode:'COLORBLIND',volume:'VOLUME',lvReady:'LEVEL UP READY',lvTap:'TAP ▲ TO CHOOSE · OR WAIT FOR A LULL',lvKey:'PRESS ENTER TO CHOOSE · OR WAIT FOR A LULL',
  signalLost:'SIGNAL LOST',newHigh:'NEW HIGH SCORE',runBack:'RUN IT BACK',permUp:'PERMANENT UPGRADES',
  bestScore:'BEST SCORE',bestSector:'BEST SECTOR',bosses:'BOSSES',cr:'CR',upgradeReady:'UPGRADE READY',contracts:'CONTRACTS',nextContracts:'NEXT CONTRACTS',
  dailyReady:'DAILY BONUS READY · ×2 CREDITS',launcher:'LAUNCHER',district:'DISTRICT',heat:'HEAT',rewards:'REWARDS ×{x}',moreLaunchers:'MORE LAUNCHERS IN UPLINK',
@@ -325,7 +343,7 @@ ru:{ui:{
  hint:'<em>Целься</em> мышью или пальцем · диски летят сами<br><em>Рикошеть</em> от стен · держи <em>файрвол</em> · <em>ПРОБЕЛ</em>/тап ◉ — Импульс',
  setHint:'<em>Прицел</em>: мышь, палец или ←/→ · диски летят сами<br><em>Импульс</em>: ПРОБЕЛ или тап ◉ · <em>Пауза</em>: P / ESC · карточки: 1 / 2 / 3',
  levelUp:'НОВЫЙ УРОВЕНЬ',selectAug:'ВЫБЕРИ АУГМЕНТ',reroll:'ПЕРЕБРОС',paused:'ПАУЗА',resume:'ПРОДОЛЖИТЬ',restart:'НОВЫЙ ЗАБЕГ',mainMenu:'ГЛАВНОЕ МЕНЮ',
- music:'МУЗЫКА',sfx:'ЗВУКИ',fxHigh:'ЭФФЕКТЫ: МАКС',fxLow:'ЭФФЕКТЫ: МИН',dmgNums:'ЦИФРЫ УРОНА',lessFlash:'МЕНЬШЕ ВСПЫШЕК',
+ music:'МУЗЫКА',sfx:'ЗВУКИ',fxHigh:'ЭФФЕКТЫ: МАКС',fxLow:'ЭФФЕКТЫ: МИН',dmgNums:'ЦИФРЫ УРОНА',lessFlash:'МЕНЬШЕ ВСПЫШЕК',cbMode:'ДАЛЬТОНИЗМ',volume:'ГРОМКОСТЬ',lvReady:'НОВЫЙ УРОВЕНЬ ГОТОВ',lvTap:'НАЖМИ ▲, ЧТОБЫ ВЫБРАТЬ · ИЛИ ДОЖДИСЬ ЗАТИШЬЯ',lvKey:'ENTER — ВЫБРАТЬ · ИЛИ ДОЖДИСЬ ЗАТИШЬЯ',
  signalLost:'СИГНАЛ ПОТЕРЯН',newHigh:'НОВЫЙ РЕКОРД',runBack:'ЕЩЁ РАЗ',permUp:'ПОСТОЯННЫЕ УЛУЧШЕНИЯ',
  bestScore:'РЕКОРД',bestSector:'ЛУЧШИЙ СЕКТОР',bosses:'БОССЫ',cr:'КР',upgradeReady:'ЕСТЬ УЛУЧШЕНИЕ',contracts:'КОНТРАКТЫ',nextContracts:'СЛЕДУЮЩИЕ КОНТРАКТЫ',
  dailyReady:'ЕЖЕДНЕВНЫЙ БОНУС · ×2 КРЕДИТЫ',launcher:'ТУРЕЛЬ',district:'РАЙОН',heat:'НАКАЛ',rewards:'НАГРАДЫ ×{x}',moreLaunchers:'НОВЫЕ ТУРЕЛИ — В АПЛИНКЕ',
@@ -370,7 +388,7 @@ zh:{ui:{
  hint:'用鼠标或手指<em>瞄准</em> · 飞盘自动发射<br>利用墙壁<em>反弹</em> · 守住<em>防火墙</em> · <em>空格</em>/点击 ◉ 释放脉冲',
  setHint:'<em>瞄准</em>：鼠标、拖动或 ←/→ · 飞盘自动发射<br><em>脉冲</em>：空格或点击 ◉ · <em>暂停</em>：P / ESC · 升级卡：1 / 2 / 3',
  levelUp:'升级',selectAug:'选择强化',reroll:'重掷',paused:'已暂停',resume:'继续',restart:'重新开始',mainMenu:'主菜单',
- music:'音乐',sfx:'音效',fxHigh:'特效：高',fxLow:'特效：低',dmgNums:'伤害数字',lessFlash:'减少闪光',
+ music:'音乐',sfx:'音效',fxHigh:'特效：高',fxLow:'特效：低',dmgNums:'伤害数字',lessFlash:'减少闪光',cbMode:'色盲模式',volume:'音量',lvReady:'升级就绪',lvTap:'点击 ▲ 选择 · 或等待战斗间隙',lvKey:'按 ENTER 选择 · 或等待战斗间隙',
  signalLost:'信号中断',newHigh:'新纪录',runBack:'再来一局',permUp:'永久升级',
  bestScore:'最高分',bestSector:'最远扇区',bosses:'首领',cr:'CR',upgradeReady:'可升级',contracts:'合约',nextContracts:'下一批合约',
  dailyReady:'每日奖励就绪 · 信用点 ×2',launcher:'发射器',district:'区域',heat:'热度',rewards:'奖励 ×{x}',moreLaunchers:'更多发射器见上行链路',
@@ -415,7 +433,7 @@ tr:{ui:{
  hint:'Fare veya parmakla <em>nişan al</em> · diskler otomatik atılır<br>Duvarlardan <em>sektir</em> · <em>güvenlik duvarını</em> koru · Darbe için <em>BOŞLUK</em>/◉',
  setHint:'<em>Nişan</em>: fare, sürükleme veya ←/→ · diskler otomatik atılır<br><em>Darbe</em>: BOŞLUK veya ◉ · <em>Duraklat</em>: P / ESC · kartlar: 1 / 2 / 3',
  levelUp:'SEVİYE ATLADIN',selectAug:'GÜÇLENDİRME SEÇ',reroll:'YENİLE',paused:'DURAKLATILDI',resume:'DEVAM ET',restart:'YENİDEN BAŞLA',mainMenu:'ANA MENÜ',
- music:'MÜZİK',sfx:'SES',fxHigh:'EFEKT: YÜKSEK',fxLow:'EFEKT: DÜŞÜK',dmgNums:'HASAR SAYILARI',lessFlash:'AZ PARLAMA',
+ music:'MÜZİK',sfx:'SES',fxHigh:'EFEKT: YÜKSEK',fxLow:'EFEKT: DÜŞÜK',dmgNums:'HASAR SAYILARI',lessFlash:'AZ PARLAMA',cbMode:'RENK KÖRÜ',volume:'SES DÜZEYİ',lvReady:'SEVİYE ATLAMA HAZIR',lvTap:'SEÇMEK İÇİN ▲ DOKUN · YA DA SAKİN BİR AN BEKLE',lvKey:'SEÇMEK İÇİN ENTER · YA DA SAKİN BİR AN BEKLE',
  signalLost:'SİNYAL KAYBOLDU',newHigh:'YENİ REKOR',runBack:'BİR DAHA',permUp:'KALICI GELİŞTİRMELER',
  bestScore:'EN YÜKSEK SKOR',bestSector:'EN İYİ SEKTÖR',bosses:'BOSSLAR',cr:'KR',upgradeReady:'GELİŞTİRME HAZIR',contracts:'KONTRATLAR',nextContracts:'SIRADAKİ KONTRATLAR',
  dailyReady:'GÜNLÜK BONUS HAZIR · ×2 KREDİ',launcher:'FIRLATICI',district:'BÖLGE',heat:'ISI',rewards:'ÖDÜL ×{x}',moreLaunchers:'YENİ FIRLATICILAR GELİŞTİRME EKRANINDA',
@@ -478,6 +496,8 @@ const Save={d:{best:0,bestSector:0,bestLevel:0,runs:0,kills:0,bosses:0,credits:0
  load(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s&&typeof s==='object'){Object.assign(this.d,s);this.d.up=Object.assign({},s.up||{});this.d.ct=Object.assign({},s.ct||{});if(!Array.isArray(this.d.active))this.d.active=[];const d=this.d;if(!s.bk){d.bk={};if(d.bosses>=1)d.bk.warden=1;if(d.bosses>=2)d.bk.hydra=1;if(d.bosses>=3)d.bk.overseer=1;}if(!s.dBest){d.dBest={grid:d.bestSector||0};}if(!s.hb){d.hb={};if((d.dBest.grid||0)>=11)d.hb.grid=0;}if(!s.seenE){d.seenE={};if(d.runs){['node','dart','bulwark','sentinel','splitter','gunner','phaser'].forEach(k=>{if((d.bestSector||0)>=({node:1,dart:2,bulwark:3,sentinel:4,splitter:6,gunner:7,phaser:8})[k])d.seenE[k]=1;});}}}}catch(e){}},
  save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(this.d));}catch(e){}}};
 Save.load();
+// follow the system reduced-motion setting until the player picks LESS FLASH themselves
+try{if(!Save.d.calmSet&&matchMedia('(prefers-reduced-motion: reduce)').matches)Save.d.calm=true;}catch(e){}
 
 // ---------------------------------------------------------------- platform hooks
 // Wire your portal SDK here (ads, leaderboards, analytics). Events are also posted to a parent frame.
@@ -509,9 +529,10 @@ const Sound=(()=>{
   const len=ac.sampleRate*2;noiseBuf=ac.createBuffer(1,len,ac.sampleRate);const ch=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)ch[i]=Math.random()*2-1;
   nextT=ac.currentTime+0.1;t0=nextT;timer=setInterval(sched,25);
  }
- function apply(){if(!ac)return;sfxG.gain.value=Save.d.sfx?0.5:0;musG.gain.cancelScheduledValues(ac.currentTime);musG.gain.value=Save.d.music?0.34:0;}
+ const MV=()=>Save.d.music?0.34*(Save.d.musVol??1):0,SV=()=>Save.d.sfx?0.5*(Save.d.sfxVol??1):0; // master levels × the player's volume sliders
+ function apply(){if(!ac)return;sfxG.gain.value=SV();musG.gain.cancelScheduledValues(ac.currentTime);musG.gain.value=MV();}
  // sidechain-style duck: big hits briefly pull the music down so they land harder
- function duck(amt,dur){if(!ac||!Save.d.music)return;const g=musG.gain,t=ac.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(0.34*amt,t+0.03);g.linearRampToValueAtTime(0.34,t+0.03+dur);}
+ function duck(amt,dur){const m=MV();if(!ac||!m)return;const g=musG.gain,t=ac.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(m*amt,t+0.03);g.linearRampToValueAtTime(m,t+0.03+dur);}
  function ok(n,ms){const t=performance.now();if(last[n]&&t-last[n]<ms)return false;last[n]=t;return true;}
  function osc(type,f,t,dur,vol,dest,f2,att=0.003){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+0.05);}
  function nz(t,dur,vol,type,f,dest,q=1,f2){const s=ac.createBufferSource();s.buffer=noiseBuf;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);fl.Q.value=q;const g=ac.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);s.connect(fl);fl.connect(g);g.connect(dest);s.start(t,Math.random()*Math.max(0,1.9-dur));s.stop(t+dur+0.05);}
@@ -688,6 +709,11 @@ const ET={
  mini:{shape:'tri',size:11,hp:7,spd:82,xp:0.5,sc:4,col:'#3dffb0',cost:0,dmg:5,noNum:true},
  cache:{shape:'cache',size:24,hp:70,spd:0,xp:14,sc:250,col:'#ffd23b',cost:0,dmg:0,spin:1.6},
 };
+// colour-blind palette: separates the red/orange/green family by lightness and the blue-yellow axis (shapes still differ per type)
+const ET_COL={},ET_CB={node:'#ff2bd6',dart:'#ffe14d',bulwark:'#9b8cff',sentinel:'#2f9bff',splitter:'#f2f6ff',gunner:'#ff7a00',phaser:'#00d1c1',mini:'#f2f6ff',cache:'#ffd23b'};
+for(const k in ET)ET_COL[k]=ET[k].col;
+function applyPalette(){for(const k in ET)ET[k].col=Save.d.cb?(ET_CB[k]||ET_COL[k]):ET_COL[k];if(typeof sprCache!=='undefined')sprCache.clear();}
+applyPalette();
 const UNLOCK={node:1,dart:2,bulwark:3,sentinel:4,splitter:6,gunner:7,phaser:8};
 const WEIGHT={node:10,dart:5,bulwark:2.4,sentinel:3,splitter:2.6,gunner:1.6,phaser:2.6};
 const INTRO={dart:['DART','Fast and erratic. Lead your shots.'],bulwark:['BULWARK','Heavy armor. Focus fire.'],sentinel:['SENTINEL','Shielded from below. Bank shots off the walls.'],splitter:['SPLITTER','Splits into fragments when destroyed.'],gunner:['GUNNER','Shoots the firewall. Shoot its bullets down.'],phaser:['PHASER','Phases out of reality. Time your hits.']};
@@ -1575,6 +1601,12 @@ function drawFieldHud(t){
  if(full){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=0.45;const g=glowSpr(COL.amber),s=pr*3.4*(1+0.08*Math.sin(t*6)+R.pulseReadyFx*0.6);ctx.drawImage(g.c,px-s/2,py-s/2,s,s);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(20,8,0,0.55)';ctx.beginPath();ctx.arc(px,py,pr-4,0,TAU);ctx.fill();}
  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`900 ${fz(12)}px ${FONT}`;ctx.fillStyle=full?'#fff':rgba(COL.cyan,0.7);ctx.fillText(lt('pulse'),px,py-(full&&!touchUser?6*HK:0),pr*1.8);
  if(full&&!touchUser){ctx.font=`700 ${fz(9)}px ${FONT}`;ctx.fillStyle=COL.amber;ctx.fillText(lt('space'),px,py+10*HK,pr*1.6);}ctx.textBaseline='alphabetic';
+ if(R.luBank&&picksPending()&&state==='play'){const bx=LVB.x(),by=LVB.y(),br=LVB.r,pu=0.5+0.5*Math.sin(t*8),n=R.pendingLevels+R.freePicks+R.lootPicks;
+  ctx.globalCompositeOperation='lighter';ctx.globalAlpha=0.35+0.3*pu;const g=glowSpr(COL.amber),gs=br*3.4*(1+0.12*pu);ctx.drawImage(g.c,bx-gs/2,by-gs/2,gs,gs);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle=rgba(COL.amber,0.2+0.15*pu);ctx.beginPath();ctx.arc(bx,by,br,0,TAU);ctx.fill();ctx.strokeStyle=COL.amber;ctx.lineWidth=3;ctx.stroke();
+  const ay=by-2-3*pu;ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(bx,ay-11);ctx.lineTo(bx+11,ay+6);ctx.lineTo(bx-11,ay+6);ctx.closePath();ctx.fill();
+  ctx.textAlign='center';ctx.textBaseline='middle';if(n>1){ctx.font=`900 ${fz(11)}px ${FONT}`;ctx.fillStyle=COL.amber;ctx.fillText('×'+n,bx+br*0.9,by-br*0.85);}
+  if(!touchUser){ctx.font=`700 ${fz(9)}px ${FONT}`;ctx.fillStyle=COL.amber;ctx.fillText('ENTER',bx,by+br+9*HK);}ctx.textBaseline='alphabetic';}
  if(R.combo>=3){const cy=R.boss?92:50,pop=1+R.comboPop*0.35,cm=comboMult();ctx.fillStyle='rgba(5,3,18,0.7)';ctx.fillRect(W-130,cy-14,118,60);ctx.textAlign='right';
   glowText('x'+cm.toFixed(2).replace(/0$/,''),W-18,cy+18,Math.round(30*pop),R.combo>=40?COL.amber:COL.mag,'right');
   ctx.font=`700 ${fz(11)}px ${FONT}`;ctx.fillStyle='rgba(255,255,255,0.75)';ctx.fillText(lt('comboN',{n:R.combo}),W-18,cy+34,110);
@@ -1650,7 +1682,9 @@ function hideAll(){screens.forEach(s=>$(s).classList.add('hidden'));}
 let shopReturn='sMenu';
 function refreshToggles(){
  for(const s of['','2']){const set=(id,on,txt)=>{const e=$(id+s);if(!e)return;e.classList.toggle('on',!!on);e.textContent=txt;};
-  set('tMusic',Save.d.music,lt('music'));set('tSfx',Save.d.sfx,lt('sfx'));set('tFx',Save.d.fx,Save.d.fx?lt('fxHigh'):lt('fxLow'));set('tDmg',Save.d.dmgNums,lt('dmgNums'));set('tCalm',Save.d.calm,lt('lessFlash'));}
+  set('tMusic',Save.d.music,lt('music'));set('tSfx',Save.d.sfx,lt('sfx'));set('tFx',Save.d.fx,Save.d.fx?lt('fxHigh'):lt('fxLow'));set('tDmg',Save.d.dmgNums,lt('dmgNums'));set('tCalm',Save.d.calm,lt('lessFlash'));set('tCb',Save.d.cb,lt('cbMode'));
+  renderVols('vols'+s);}
+ document.documentElement.classList.toggle('calm',!!Save.d.calm);
  renderLangRow();
 }
 function anyAffordable(){return UPGRADES.some(u=>U(u.id)<u.max&&Save.d.credits>=u.cost[U(u.id)])||LAUNCHERS.some(l=>!owned(l.id)&&lchReqMet(l)&&Save.d.credits>=l.cost);}
@@ -1729,7 +1763,10 @@ function rollPerks(n,minRar=0,evoChance=0.6,exclude=[]){
 const pickMode=()=>R.freePicks>0?'kit':R.lootPicks>0?'loot':'lvl';
 function consumePick(m){if(m==='kit')R.freePicks--;else if(m==='loot')R.lootPicks--;else R.pendingLevels--;}
 function rollFor(m,ex){return m==='loot'?rollPerks(3,1,1,ex):rollPerks(3,0,0.6,ex);}
+const lvSafe=()=>R.danger<0.3&&R.warnT<=0&&!(R.boss&&R.boss.tele)&&!bullets.some(b=>!b.dead&&b.y>FW_Y-320); // nothing about to hit the firewall
+const LVB={x:()=>W-150,y:()=>H-50,r:28}; // banked level-up button, between the launcher and the Pulse button
 function openLevelUp(){
+ if(R)R.luBank=false;
  if(!picksPending())return;
  const m=pickMode();
  if(R.demo||BOT){const o=rollFor(m);if(o.length)applyPerk(o[0]);consumePick(m);if(picksPending())openLevelUp();return;}
@@ -1826,13 +1863,17 @@ function renderShop(){
 }
 function openShop(from){Sound.init();shopReturn=from;renderShop();show('sShop');SFX.ui();}
 function closeShop(){SFX.ui();if(shopReturn==='sOver'){show('sOver');$('overCr').textContent=crLine();$('bShop2').classList.toggle('alert',anyAffordable());}else{show('sMenu');refreshMenu();}}
-function toggle(k){Sound.init();if(k==='fx'){Save.d.fx=Save.d.fx?0:1;autoLow=false;resize();}else Save.d[k]=!Save.d[k];Save.save();Sound.apply();refreshToggles();SFX.ui();}
+function renderVols(id){const box=$(id);if(!box)return;const row=(k,lab)=>{const v=Math.round((Save.d[k]??1)*100);return`<label class="vol"><span>${lab}</span><input type="range" min="0" max="100" step="5" value="${v}" data-k="${k}" style="--p:${v}%" aria-label="${lab} ${lt('volume')}"><output>${v}</output></label>`;};
+ box.innerHTML=row('musVol',lt('music'))+row('sfxVol',lt('sfx'));
+ box.querySelectorAll('input').forEach(i=>{i.oninput=()=>{Sound.init();Save.d[i.dataset.k]=i.value/100;i.style.setProperty('--p',i.value+'%');i.nextElementSibling.textContent=i.value;Sound.apply();};
+  i.onchange=()=>{Save.save();if(i.dataset.k==='sfxVol')SFX.pick();};});}
+function toggle(k){Sound.init();if(k==='calm')Save.d.calmSet=true;if(k==='fx'){Save.d.fx=Save.d.fx?0:1;autoLow=false;resize();}else Save.d[k]=!Save.d[k];if(k==='cb')applyPalette();Save.save();Sound.apply();refreshToggles();SFX.ui();}
 
 $('bPlay').onclick=startGame;$('bShop').onclick=()=>openShop('sMenu');$('bShop2').onclick=()=>{if(performance.now()-R.overShown>700)openShop('sOver');};
 $('bShopBack').onclick=closeShop;$('bCodex').onclick=openCodex;$('bCodexBack').onclick=()=>{SFX.ui();show('sMenu');refreshMenu();};$('bSettings').onclick=()=>{Sound.init();SFX.ui();refreshToggles();show('sSettings');};$('bSetBack').onclick=()=>{SFX.ui();show('sMenu');refreshMenu();};$('bReroll').onclick=reroll;$('bResume').onclick=()=>{SFX.ui();resumeGame();};
 $('bRestart').onclick=()=>{finalizeRun();startGame();};$('bQuit').onclick=()=>{SFX.ui();finalizeRun();goMenu();};
 $('bRetry').onclick=()=>{if(performance.now()-R.overShown>700)startGame();};$('bMenu2').onclick=()=>{if(performance.now()-R.overShown>700){SFX.ui();goMenu();}};
-for(const s of['','2']){$('tMusic'+s).onclick=()=>toggle('music');$('tSfx'+s).onclick=()=>toggle('sfx');$('tFx'+s).onclick=()=>toggle('fx');$('tDmg'+s).onclick=()=>toggle('dmgNums');$('tCalm'+s).onclick=()=>toggle('calm');}
+for(const s of['','2']){$('tMusic'+s).onclick=()=>toggle('music');$('tSfx'+s).onclick=()=>toggle('sfx');$('tFx'+s).onclick=()=>toggle('fx');$('tDmg'+s).onclick=()=>toggle('dmgNums');$('tCalm'+s).onclick=()=>toggle('calm');$('tCb'+s).onclick=()=>toggle('cb');}
 document.querySelectorAll('.btn').forEach(b=>b.addEventListener('pointerenter',()=>SFX.ui()));
 
 // ---------------------------------------------------------------- input
@@ -1841,7 +1882,8 @@ function setAim(cx,cy){const w=toWorld(cx,cy);input.wx=w.x;input.wy=w.y;input.ha
 cv.addEventListener('pointerdown',e=>{
  Sound.init();if(e.pointerType!=='mouse')touchUser=true;
  if(state==='play'){const pb=view.pauseBtn;if(e.clientX>=pb.x-6&&e.clientX<=pb.x+pb.w+6&&e.clientY>=pb.y-6&&e.clientY<=pb.y+pb.h+6){pauseGame();return;}
-  const w=toWorld(e.clientX,e.clientY);if(Math.hypot(w.x-(W-62),w.y-(H-50))<50){triggerPulse();return;}}
+  const w=toWorld(e.clientX,e.clientY);if(R.luBank&&picksPending()&&Math.hypot(w.x-LVB.x(),w.y-LVB.y())<LVB.r+8){openLevelUp();return;}
+  if(Math.hypot(w.x-(W-62),w.y-(H-50))<50){triggerPulse();return;}}
  input.aimId=e.pointerId;setAim(e.clientX,e.clientY);try{cv.setPointerCapture(e.pointerId);}catch(_){}
 });
 cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){touchUser=false;setAim(e.clientX,e.clientY);}else if(e.pointerId===input.aimId)setAim(e.clientX,e.clientY);});
@@ -1852,7 +1894,7 @@ addEventListener('keydown',e=>{
  if(k===' '||k==='e'||k==='E'){e.preventDefault();if(state==='play')triggerPulse();}
  if(k==='p'||k==='P'||k==='Escape'){if(state==='play')pauseGame();else if(state==='paused')resumeGame();}
  if(state==='levelup'){if(k>='1'&&k<='3')choosePerk(+k-1);if(k==='r'||k==='R')reroll();}
- if(k==='Enter'){if(state==='menu')startGame();else if(state==='over'&&performance.now()-R.overShown>700)startGame();}
+ if(k==='Enter'){if(state==='play'&&R&&R.luBank&&picksPending())openLevelUp();else if(state==='menu')startGame();else if(state==='over'&&performance.now()-R.overShown>700)startGame();}
 });
 addEventListener('keyup',e=>{const k=e.key;if(k==='ArrowLeft'||k==='a'||k==='A')keys.left=false;if(k==='ArrowRight'||k==='d'||k==='D')keys.right=false;});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(state==='play')pauseGame();Sound.suspend();}else if(state!=='play'||!document.hidden)Sound.resume();});
@@ -1870,8 +1912,14 @@ function loop(now){
   if(R.hitStop>0)R.hitStop-=dtr;
   else{if(R.slowT>0){R.slowT-=dtr;R.ts=R.slowS;}else R.ts=Math.min(1,R.ts+dtr*3);
   let rem=dtr*R.ts*SPEED;while(rem>1e-6){const s=Math.min(rem,1/50);updateRun(s);rem-=s;if(state==='levelup'||state==='over')break;}}
-  if(R.luDelay>0&&state==='play'){R.luDelay-=dtr;if(R.luDelay<=0)openLevelUp();}
-  if(state==='play'&&R.luDelay<=0&&picksPending())openLevelUp();
+  if(R.luDelay>0&&state==='play')R.luDelay-=dtr;
+  // banked level-ups: open at once when calm; under pressure keep playing, show the ▲ button, and open after ~0.8s of calm (or on tap/Enter)
+  if(state==='play'&&R.luDelay<=0&&picksPending()){
+   if(R.demo||BOT)openLevelUp();
+   else{const safe=lvSafe();R.safeT=safe?(R.safeT||0)+dtr:0;
+    if(!R.luBank){if(safe)openLevelUp();else{R.luBank=true;R.luBankT=0;SFX.ready();
+     if(!Save.d.lvTut){Save.d.lvTut=1;Save.save();banner(lt('lvReady'),touchUser?lt('lvTap'):lt('lvKey'),COL.amber,3);}else ftext(W-150,H-100,lt('lvReady'),COL.amber,13,1,-30);}}
+    else{R.luBankT+=dtr;if(R.safeT>=0.8)openLevelUp();}}}
   if(state==='dying'){R.dieT-=dtr;if(R.dieT<=0)gameOver();}
  }
  if(R&&state==='levelup')updateFx(dtr*0.25); // gameplay is frozen while choosing, but sparks, rings and XP shards keep drifting
