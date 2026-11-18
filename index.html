@@ -29,7 +29,7 @@ canvas#c{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block;touc
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));pointer-events:auto;background:radial-gradient(ellipse at center,rgba(10,4,32,.55),rgba(3,1,10,.9));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);transition:opacity .25s,visibility .25s;overflow-y:auto;overflow-x:hidden}
 .screen.clear{background:radial-gradient(ellipse at center,rgba(10,4,32,.25),rgba(3,1,10,.75));-webkit-backdrop-filter:none;backdrop-filter:none}
 .screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.logo{font-family:var(--fd);font-weight:900;font-size:clamp(46px,12.5vw,118px);letter-spacing:.07em;line-height:1;color:#fff;text-shadow:0 0 4px #fff,0 0 14px var(--cyan),0 0 40px var(--cyan),0 0 80px rgba(34,243,255,.45);position:relative;white-space:nowrap}
+.logo{font-family:var(--fd);font-weight:900;font-size:clamp(40px,10vw,88px);letter-spacing:.07em;line-height:1;color:#fff;text-shadow:0 0 4px #fff,0 0 14px var(--cyan),0 0 40px var(--cyan),0 0 80px rgba(34,243,255,.45);position:relative;white-space:nowrap}
 .logo::before,.logo::after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;text-shadow:none}
 .logo::before{color:var(--mag);animation:gl1 3.2s infinite steps(1)}
 .logo::after{color:var(--cyan);animation:gl2 2.7s infinite steps(1)}
@@ -174,6 +174,19 @@ h2.cy{text-shadow:0 0 12px var(--cyan),0 0 40px var(--cyan)}
 .cx .ok{color:#7dff4d}
 .lbtn{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--amber);border:1px solid var(--amber);background:rgba(255,182,39,.08);padding:9px 8px;min-width:88px;cursor:pointer}
 .lbtn:disabled{opacity:.35;cursor:default}.lbtn.eq{color:var(--cyan);border-color:var(--cyan)}
+/* next-unlock strip: what the player is closest to, with a bar that fills from the pre-run value on game over */
+.goal{--c:#22f3ff;width:min(92vw,440px);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:rgba(4,2,16,.72);padding:8px 12px 10px;text-align:left;font-family:var(--fd);box-shadow:inset 0 0 18px color-mix(in srgb,var(--c) 10%,transparent)}
+.goal .gh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.goal small{font-size:9px;letter-spacing:.3em;color:var(--dim)}.goal .gh span{font-size:10px;letter-spacing:.14em;color:var(--dim)}.goal .gh b{color:var(--c);text-shadow:0 0 8px var(--c);font-size:13px;letter-spacing:.06em}
+.goal .gr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:5px 0 6px;font-family:var(--fb);font-size:14px;font-weight:600;color:#c3cbe8}
+.goal .gr em{font-style:normal;font-family:var(--fd);font-size:11px;color:#fff;white-space:nowrap}
+.goal .gb{height:5px;background:rgba(255,255,255,.08)}.goal .gb i{display:block;height:100%;background:var(--c);box-shadow:0 0 8px var(--c);transition:width 1.2s cubic-bezier(.2,.8,.2,1) .9s}
+#menuGoal:empty,#overGoal:empty{display:none}
+.uv{font-family:var(--fd);font-size:11px;color:var(--dim);letter-spacing:.06em;margin-top:3px}.uv b{color:#7dff4d;text-shadow:0 0 8px rgba(125,255,77,.6)}
+.up.bought,.cx.bought{animation:bought .8s ease-out}.up.bought .ub,.cx.bought .ub{animation:ubpop .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes bought{0%{background:rgba(125,255,77,.28);border-color:#7dff4d;box-shadow:0 0 34px rgba(125,255,77,.6)}100%{}}
+@keyframes ubpop{0%{transform:scale(1.4)}100%{transform:none}}
+.crs.spent{animation:ubpop .45s cubic-bezier(.2,1.6,.4,1)}
 .unl{font-family:var(--fd);font-size:11px;letter-spacing:.12em;color:#7dff4d;text-shadow:0 0 10px #7dff4d;text-align:center;line-height:1.7;max-width:92vw}
 .unl>div,.newskin.rv{opacity:0;animation:unlIn .45s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes unlIn{from{opacity:0;transform:translateY(8px) scale(.85)}to{opacity:1;transform:none}}
@@ -194,6 +207,7 @@ h2.cy{text-shadow:0 0 12px var(--cyan),0 0 40px var(--cyan)}
     <button class="btn primary" id="bPlay" data-i18n="play">JACK IN</button>
     <div class="daily" id="menuDaily"></div>
     <div class="mbtns"><button class="btn" id="bShop"><span data-i18n="uplink">UPLINK</span><span class="note" id="menuCr"></span></button><button class="btn mag" id="bCodex"><span data-i18n="codex">CODEX</span><span class="note" id="menuCodex"></span></button><button class="btn" id="bSettings" style="flex:0 0 54px;font-size:22px;padding:6px 0" aria-label="Settings">⚙</button></div>
+    <div id="menuGoal"></div>
     <div class="stats" id="menuStats"></div>
     <div class="contracts" id="menuContracts"></div>
     <div class="hint" id="menuHint" data-i18n-html="hint"><em>Aim</em> with mouse or drag · discs fire automatically<br><em>Bank shots</em> off the walls · hold the <em>firewall</em> · <em>SPACE</em>/tap ◉ to Pulse</div>
@@ -225,6 +239,7 @@ h2.cy{text-shadow:0 0 12px var(--cyan),0 0 40px var(--cyan)}
     <div class="earn" id="overEarn"></div>
     <div class="newskin" id="overSkin"></div>
     <div class="unl" id="overUnl"></div>
+    <div id="overGoal"></div>
     <div class="contracts" id="overContracts"></div>
     <button class="btn primary" id="bRetry" data-i18n="runBack">RUN IT BACK</button>
     <button class="btn" id="bShop2"><span data-i18n="uplink">UPLINK</span><span class="note" id="overCr"></span></button>
@@ -303,7 +318,7 @@ en:{ui:{
  gridShifts:'THE GRID SHIFTS · SECTOR {n}',neutralized:'TARGET NEUTRALIZED',lootIncoming:'+25% INTEGRITY · BOSS LOOT INCOMING',contractDone:'CONTRACT COMPLETE',
  pulseReady:'PULSE READY',tapPulse:'TAP THE ◉ BUTTON TO UNLEASH',spacePulse:'PRESS SPACE TO UNLEASH',event:'EVENT: {n}',evolution:'EVOLUTION: {n}',feat:'FEAT: {n}',heatN:'HEAT {n}',
  rar0:'STANDARD',rar1:'MILSPEC',rar2:'BLACK ICE',rar3:'EVOLUTION',
- streak0:'NICE',streak1:'GREAT',streak2:'INSANE',streak3:'UNSTOPPABLE',streak4:'GODLIKE'
+ streak0:'NICE',streak1:'GREAT',streak2:'INSANE',streak3:'UNSTOPPABLE',streak4:'GODLIKE',nextUnlock:'NEXT UNLOCK',kAug:'AUGMENT',kSkin:'DISC SKIN'
 }},
 ru:{ui:{
  tag:'// ПРОТОКОЛ НЕОНОВОЙ СЕТИ',play:'ПОДКЛЮЧИТЬСЯ',uplink:'АПЛИНК',codex:'КОДЕКС',settings:'НАСТРОЙКИ',back:'НАЗАД',language:'ЯЗЫК',
@@ -332,7 +347,7 @@ ru:{ui:{
  gridShifts:'СЕТЬ МЕНЯЕТСЯ · СЕКТОР {n}',neutralized:'ЦЕЛЬ УНИЧТОЖЕНА',lootIncoming:'+25% ЦЕЛОСТНОСТИ · ТРОФЕИ БОССА',contractDone:'КОНТРАКТ ВЫПОЛНЕН',
  pulseReady:'ИМПУЛЬС ГОТОВ',tapPulse:'НАЖМИ ◉, ЧТОБЫ ВЫПУСТИТЬ',spacePulse:'НАЖМИ ПРОБЕЛ, ЧТОБЫ ВЫПУСТИТЬ',event:'СОБЫТИЕ: {n}',evolution:'ЭВОЛЮЦИЯ: {n}',feat:'ДОСТИЖЕНИЕ: {n}',heatN:'НАКАЛ {n}',
  rar0:'СТАНДАРТ',rar1:'ВОЕНСПЕЦ',rar2:'ЧЁРНЫЙ ЛЁД',rar3:'ЭВОЛЮЦИЯ',
- streak0:'ОТЛИЧНО',streak1:'СУПЕР',streak2:'БЕЗУМИЕ',streak3:'НЕУДЕРЖИМ',streak4:'БОЖЕСТВЕННО'
+ streak0:'ОТЛИЧНО',streak1:'СУПЕР',streak2:'БЕЗУМИЕ',streak3:'НЕУДЕРЖИМ',streak4:'БОЖЕСТВЕННО',nextUnlock:'СЛЕДУЮЩЕЕ ОТКРЫТИЕ',kAug:'АУГМЕНТ',kSkin:'СКИН ДИСКА'
 },
 P:{dmg:['Разгон','+25% к урону дисков.'],rate:['Скоростной цикл','+18% к скорострельности.'],bounce:['Рикошет+','Диски отскакивают на 1 раз больше.'],speed:['Гипердвигатель','+12% к скорости дисков и +10% к урону.'],size:['Широкий диск','+22% к размеру дисков. Проще попадать.'],xp:['Майнер данных','+20% опыта за каждое убийство.'],repair:['Нано-ремонт','Восстанавливает 40% целостности и даёт +10 к максимуму.'],multi:['Двойной ствол','+1 диск за выстрел.'],pierce:['Фазовая кромка','Диски пробивают +1 врага перед отскоком.'],crit:['Нулевой день','+8% к шансу крита. Криты бьют сильнее.'],amp:['Усилитель','Каждый рикошет даёт диску +22% урона.'],chill:['Криокод','Попадания замедляют врагов на 45%.'],cap:['Конденсатор','Импульс заряжается на 35% быстрее и бьёт на 30% сильнее.'],frag:['Фрагментатор','Убитые враги разлетаются на 2 мини-диска.'],chain:['Дуговая связь','18% шанс, что молния перескочит на 2 ближайших врагов.'],drone:['Дрон-страж','+1 дрон на орбите, стреляющий самонаводящимися зарядами.'],blast:['Детонатор','Убитые враги взрываются и ранят всех рядом.'],homing:['ИИ наведения','После первого рикошета диски наводятся на врагов.'],grid:['Лазерная сетка','Файрвол сжигает приблизившихся врагов.'],floor:['Отражающий пол','Диски отскакивают и от нижнего края.']},
 E:{e_loop:['Бесконечная петля','Убийства возвращают рикошет. Усилитель копится вдвое быстрее.'],e_super:['Сверхпроводник','Попадания по замедленным врагам всегда дают молнию, и каждая молния замораживает.'],e_rail:['Ядро рельсотрона','Диски пробивают всех врагов и летят на 40% быстрее.'],e_hive:['Коллективный разум','Дроны стреляют вдвое чаще. Их заряды рикошетят дважды.'],e_nova:['Сверхновая','Взрывы на 60% больше, на 50% сильнее и разбрасывают шрапнель.'],e_storm:['Шквал','Каждый 4-й залп — 3 перегруженных диска (+180% урона).'],e_exec:['Палач','Криты добивают врагов со здоровьем ниже 30%. Криты по боссам бьют на 50% сильнее.'],e_aegis:['Эгида','Каждые 8 секунд файрвол выпускает ударную волну: сбивает пули и бьёт ближайших врагов.']},
@@ -377,7 +392,7 @@ zh:{ui:{
  gridShifts:'网格变换 · 扇区 {n}',neutralized:'目标已消灭',lootIncoming:'+25% 完整度 · 首领战利品来袭',contractDone:'合约完成',
  pulseReady:'脉冲就绪',tapPulse:'点击 ◉ 按钮释放',spacePulse:'按空格键释放',event:'事件：{n}',evolution:'进化：{n}',feat:'成就：{n}',heatN:'热度 {n}',
  rar0:'标准',rar1:'军规',rar2:'黑冰',rar3:'进化',
- streak0:'不错',streak1:'很棒',streak2:'疯狂',streak3:'势不可挡',streak4:'神级'
+ streak0:'不错',streak1:'很棒',streak2:'疯狂',streak3:'势不可挡',streak4:'神级',nextUnlock:'下一个解锁',kAug:'强化',kSkin:'飞盘皮肤'
 },
 P:{dmg:['超频','飞盘伤害 +25%。'],rate:['快速循环','射速 +18%。'],bounce:['弹射+','飞盘额外弹射 1 次。'],speed:['超驱动','飞盘速度 +12%，伤害 +10%。'],size:['宽幅飞盘','飞盘尺寸 +22%，更易命中。'],xp:['数据矿工','每次击杀经验 +20%。'],repair:['纳米修复','恢复 40% 完整度，最大完整度 +10。'],multi:['分裂枪管','每次射击 +1 飞盘。'],pierce:['相位刃','飞盘弹射前额外穿透 1 个敌人。'],crit:['零日漏洞','暴击率 +8%，暴击伤害提高。'],amp:['增幅器','每次弹射使该飞盘伤害 +22%。'],chill:['冷冻代码','命中使敌人减速 45%。'],cap:['电容器','脉冲充能速度 +35%，伤害 +30%。'],frag:['碎裂者','击杀时额外迸发 2 个迷你飞盘。'],chain:['电弧链接','命中时有 18% 几率向附近 2 个敌人释放闪电。'],drone:['哨戒无人机','+1 环绕无人机，发射追踪弹。'],blast:['引爆器','击杀引发爆炸，伤害附近所有敌人。'],homing:['追踪 AI','首次弹射后，飞盘会转向敌人。'],grid:['激光网格','防火墙会灼烧靠近的敌人。'],floor:['反弹地板','飞盘也会从底部边缘弹回。']},
 E:{e_loop:['无限循环','击杀返还一次弹射。增幅器叠加速度翻倍。'],e_super:['超导体','命中减速敌人必定触发电弧，且电弧附带冰冻。'],e_rail:['电磁炮核心','飞盘穿透所有敌人，飞行速度 +40%。'],e_hive:['蜂巢思维','无人机射速翻倍，其子弹可弹射 2 次。'],e_nova:['超新星','爆炸范围 +60%，伤害 +50%，并抛射碎片。'],e_storm:['弹幕风暴','每第 4 次齐射发射 3 枚超载飞盘（伤害 +180%）。'],e_exec:['处决者','暴击可直接处决生命低于 30% 的敌人。对首领暴击伤害 +50%。'],e_aegis:['神盾网格','防火墙每 8 秒释放冲击波，清除子弹并伤害附近敌人。']},
@@ -422,7 +437,7 @@ tr:{ui:{
  gridShifts:'AĞ DEĞİŞİYOR · SEKTÖR {n}',neutralized:'HEDEF YOK EDİLDİ',lootIncoming:'+%25 BÜTÜNLÜK · BOSS GANİMETİ GELİYOR',contractDone:'KONTRAT TAMAMLANDI',
  pulseReady:'DARBE HAZIR',tapPulse:'SALMAK İÇİN ◉ DÜĞMESİNE DOKUN',spacePulse:'SALMAK İÇİN BOŞLUĞA BAS',event:'OLAY: {n}',evolution:'EVRİM: {n}',feat:'BAŞARIM: {n}',heatN:'ISI {n}',
  rar0:'STANDART',rar1:'ASKERİ',rar2:'KARA BUZ',rar3:'EVRİM',
- streak0:'GÜZEL',streak1:'HARİKA',streak2:'ÇILGIN',streak3:'DURDURULAMAZ',streak4:'EFSANE'
+ streak0:'GÜZEL',streak1:'HARİKA',streak2:'ÇILGIN',streak3:'DURDURULAMAZ',streak4:'EFSANE',nextUnlock:'SIRADAKİ KİLİT',kAug:'GÜÇLENDİRME',kSkin:'DİSK GÖRÜNÜMÜ'
 },
 P:{dmg:['Hız Aşırtma','+%25 disk hasarı.'],rate:['Hızlı Döngü','+%18 atış hızı.'],bounce:['Sekme+','Diskler bir kez daha seker.'],speed:['Hiper Sürüş','+%12 disk hızı ve +%10 hasar.'],size:['Geniş Disk','+%22 disk boyutu. Daha kolay isabet.'],xp:['Veri Madencisi','Her öldürmeden +%20 XP.'],repair:['Nano Onarım',"Bütünlüğün %40'ını onarır ve maksimumu +10 artırır."],multi:['Bölünmüş Namlu','Atış başına +1 disk.'],pierce:['Faz Kenarı','Diskler sekmeden önce +1 düşmanı deler.'],crit:['Sıfırıncı Gün','+%8 kritik şansı. Kritikler daha sert vurur.'],amp:['Yükseltici','Her sekme o diske +%22 hasar ekler.'],chill:['Kriyo Kod','İsabetler düşmanları %45 yavaşlatır.'],cap:['Kapasitör','Darbe %35 daha hızlı dolar ve %30 daha sert vurur.'],frag:['Parçalayıcı','Öldürülen düşmanlar 2 ek mini diske patlar.'],chain:['Ark Bağı','İsabetler %18 ihtimalle yakındaki 2 düşmana şimşek sıçratır.'],drone:['Nöbetçi Dron','Güdümlü atış yapan +1 yörünge dronu.'],blast:['Fünye','Öldürülen düşmanlar patlar ve yakındaki her şeye hasar verir.'],homing:['Arayıcı YZ','İlk sekmeden sonra diskler düşmanlara yönelir.'],grid:['Lazer Ağı','Güvenlik duvarı yaklaşan düşmanları yakar.'],floor:['Sekme Zemini','Diskler alt kenardan da seker.']},
 E:{e_loop:['Sonsuz Döngü','Öldürmeler bir sekme iade eder. Yükseltici iki kat hızlı birikir.'],e_super:['Süperiletken','Yavaşlamış düşmanlara isabet her zaman şimşek yayar ve her şimşek dondurur.'],e_rail:['Ray Topu Çekirdeği','Diskler tüm düşmanları deler ve %40 daha hızlı uçar.'],e_hive:['Kovan Zihni','Dronlar iki kat hızlı ateş eder. Mermileri iki kez seker.'],e_nova:['Süpernova','Patlamalar %60 daha büyük, %50 daha güçlü ve şarapnel saçar.'],e_storm:['Mermi Fırtınası','Her 4. yaylım 3 aşırı yüklü disk fırlatır (+%180 hasar).'],e_exec:['Cellat',"Kritikler canı %30'un altındaki düşmanları infaz eder. Bosslara kritikler %50 daha sert vurur."],e_aegis:['Kalkan Ağı','Güvenlik duvarı her 8 saniyede mermileri temizleyen ve yakındaki düşmanlara vuran bir şok dalgası atar.']},
@@ -1647,6 +1662,7 @@ function refreshMenu(){
  $('menuDaily').textContent=d.runs&&d.lastDay!==today()?lt('dailyReady'):'';
  $('menuHint').style.display=d.runs>2?'none':'';
  renderLoadout();$('menuCodex').textContent=codexPct()+'%';
+ {const g=d.runs?nextGoal():null;$('menuGoal').innerHTML=g?goalHTML(g):'';}
 }
 function renderLoadout(){
  const d=Save.d;if(!owned(d.launcher))d.launcher='vector';if(!DBY[d.district]||!distUnlocked(DBY[d.district]))d.district='grid';d.heat=clamp(d.heat||0,0,maxHeat(d.district));
@@ -1664,9 +1680,25 @@ function cycleLoadout(k,dir){
  if(k==='heat')d.heat=clamp((d.heat||0)+dir,0,maxHeat(d.district));
  Save.save();SFX.ui();renderLoadout();
 }
+// ---- next unlock: every locked reward with numeric progress; the strip shows the one closest to done
+function goals(){const d=Save.d,G=[],add=(id,kind,name,req,cur,max,col)=>{cur=cur||0;if(cur<max)G.push({id,kind,name,req,cur,max,col});};
+ const kv=k=>k==='sector'?d.bestSector:k==='bosses'?d.bosses:(d.cDone||0),db=d.dBest||{},bk=d.bk||{};
+ LAUNCHERS.forEach(l=>{if(l.req&&!owned(l.id))add('l_'+l.id,lt('launcher'),l.name,lReq(l),kv(l.req.k),l.req.v,l.col);});
+ add('d_forge',lt('district'),dName(DBY.forge),dReq(DBY.forge),db.grid,11,DBY.forge.col);
+ if(distUnlocked(DBY.forge))add('d_core',lt('district'),dName(DBY.core),dReq(DBY.core),db.forge,11,DBY.core.col);
+ const PP={chill:[d.bestSector,6],frag:[d.kills,1000],chain:[bk.warden,1],blast:[d.cDone,3],drone:[bk.hydra,1],homing:[d.bestSector,12],grid:[d.runs,8],floor:[bk.overseer,1]};
+ for(const id in PP)if(!BOT)add('p_'+id,lt('kAug'),pName(PERK_BY[id]),prTxt(id),PP[id][0],PP[id][1],RAR[PERK_BY[id].rar].col);
+ SKINS.forEach(sk=>{if(sk.req)add('s_'+sk.id,lt('kSkin'),sk.name,skReq(sk),kv(sk.req),sk.v,sk.col);});
+ return G;}
+function nextGoal(){const G=goals();G.sort((a,b)=>b.cur/b.max-a.cur/a.max);return G[0]||null;}
+function goalHTML(g,from){const f=g.cur/g.max,f0=from!=null?Math.min(from,g.cur)/g.max:f;
+ return`<div class="goal" style="--c:${g.col}"><div class="gh"><small>${lt('nextUnlock')}</small><span>${g.kind} · <b>${g.name}</b></span></div><div class="gr"><span>${g.req}</span><em>${fmt(g.cur)} / ${fmt(g.max)}</em></div><div class="gb"><i style="width:${(f0*100).toFixed(1)}%" data-to="${(f*100).toFixed(1)}"></i></div></div>`;}
+function fillGoal(id){requestAnimationFrame(()=>requestAnimationFrame(()=>$(id).querySelectorAll('.gb i').forEach(i=>i.style.width=i.dataset.to+'%')));}
 let codexTab='aug';
+// augments count as discovered once installed in a run; older saves with 5+ runs are assumed to have seen their unlocked ones
+function seenP(){const d=Save.d;if(!d.seenP){d.seenP={};if((d.runs||0)>=5)PERKS.forEach(p=>{if(perkUnlocked(p.id))d.seenP[p.id]=1;});}return d.seenP;}
 function codexPct(){const d=Save.d,tot=PERKS.length+EVOS.length+Object.keys(ENEMY_INFO).length+3+FEATS.length;
- const got=PERKS.filter(p=>perkUnlocked(p.id)).length+EVOS.filter(e=>d.seenEvo[e.id]).length+Object.keys(ENEMY_INFO).filter(k=>d.seenE[k]).length+['warden','hydra','overseer'].filter(k=>d.bk[k]).length+FEATS.filter(f=>d.ach[f.id]).length;return Math.round(got/tot*100);}
+ const got=PERKS.filter(p=>seenP()[p.id]).length+EVOS.filter(e=>d.seenEvo[e.id]).length+Object.keys(ENEMY_INFO).filter(k=>d.seenE[k]).length+['warden','hydra','overseer'].filter(k=>d.bk[k]).length+FEATS.filter(f=>d.ach[f.id]).length;return Math.round(got/tot*100);}
 function renderCodex(){
  const d=Save.d,tabs=[['aug','tabAug'],['evo','tabEvo'],['threat','tabThreat'],['feat','tabFeat']];
  $('codexPct').textContent=lt('decrypted',{p:codexPct()});
@@ -1740,10 +1772,12 @@ function resumeGame(){if(state!=='paused')return;hideAll();state='play';Sound.re
 function finalizeRun(){
  if(!R||R.demo||R.final)return null;R.final=true;checkContracts();
  const d=Save.d,r=R,newBest=r.score>d.best&&r.score>0,day=today(),daily=d.lastDay!==day&&r.t>=20;
+ const gb={};goals().forEach(g=>gb[g.id]=g.cur);
  const skinsBefore=new Set(SKINS.filter(skinUnlocked).map(x=>x.id)),perksBefore=new Set(PERKS.filter(p=>perkUnlocked(p.id)).map(p=>p.id)),distBefore=new Set(DISTRICTS.filter(distUnlocked).map(x=>x.id)),heatBefore=maxHeat(r.D.id),lchBefore=new Set(LAUNCHERS.filter(lchReqMet).map(l=>l.id));
  let cr=Math.floor(r.score/40)+r.bossesKilled*50+(r.bonusCr||0);cr=Math.round(cr*r.crMul);if(daily){cr*=2;d.lastDay=day;}
  for(const c of r.cDone){d.ct[c.id]=(d.ct[c.id]||0)+1;d.cDone=(d.cDone||0)+1;d.active=d.active.filter(x=>x!==c.id);}ensureContracts();
  d.credits+=cr+r.cCr;d.runs++;d.kills+=r.kills;d.bosses+=r.bossesKilled;d.best=Math.max(d.best,Math.round(r.score));d.bestSector=Math.max(d.bestSector,r.sector);d.bestLevel=Math.max(d.bestLevel,r.level);d.tut=1;
+ {const sp=seenP();for(const id in r.perks)if(PERK_BY[id]&&PERK_BY[id].rar!==3)sp[id]=1;}
  for(const k of r.bossKinds)d.bk[k]=(d.bk[k]||0)+1;for(const k of r.seenE)d.seenE[k]=1;EVOS.forEach(e=>{if(r.perks[e.id])d.seenEvo[e.id]=1;});
  d.dBest[r.D.id]=Math.max(d.dBest[r.D.id]||0,r.sector);if(r.sector>=11)d.hb[r.D.id]=Math.max(d.hb[r.D.id]??-1,r.heat);
  let fcr=r.featCr;for(const id of r.feats)d.ach[id]=1;const feats=r.feats.map(id=>FEATS.find(f=>f.id===id));
@@ -1755,7 +1789,7 @@ function finalizeRun(){
   ...(maxHeat(r.D.id)>heatBefore?[lt('heatUnl',{h:maxHeat(r.D.id),d:dName(r.D)})]:[]),
   ...LAUNCHERS.filter(l=>lchReqMet(l)&&!lchBefore.has(l.id)&&!owned(l.id)).map(l=>lt('lchAvail',{n:l.name}))];
  Save.save();
- return{cr,ccr:r.cCr,fcr,daily,newBest,done:r.cDone.slice(),newSkins,unl,feats};
+ return{cr,ccr:r.cCr,fcr,daily,newBest,done:r.cDone.slice(),newSkins,unl,feats,gb};
 }
 function gameOver(){
  state='over';const res=finalizeRun()||{cr:0,ccr:0,fcr:0,daily:false,newBest:false,done:[],newSkins:[],unl:[],feats:[]};const d=Save.d,r=R;
@@ -1768,6 +1802,7 @@ function gameOver(){
  $('overGrid').innerHTML=[['gSector',r.sector],['gLevel',r.level],['gKills',fmt(r.kills)],['gCombo',r.maxCombo],['gBosses',r.bossesKilled],['gTime',mm+':'+ss],['gLauncher',r.L.name],['gDistrict',dName(r.D)+(r.heat?' · '+r.heat:'')]].map(([k,v],i)=>`<div${i>=6?' class="wide"':''}>${lt(k)}<b>${v}</b></div>`).join('');
  const lines=[...res.feats.map(f=>lt('featLine',{n:UPC(ftName(f)),c:f.cr})),...res.unl],nSk=res.newSkins.length?1:0;
  $('overSkin').textContent=nSk?lt('newSkin',{s:res.newSkins.map(x=>x.name).join(', ')}):'';$('overSkin').classList.toggle('rv',!!nSk);$('overSkin').style.animationDelay='1s';
+ {const g=nextGoal();$('overGoal').innerHTML=g?goalHTML(g,res.gb?res.gb[g.id]:null):'';fillGoal('overGoal');}
  $('overUnl').innerHTML=lines.map((x,i)=>`<div style="animation-delay:${1+(i+nSk)*0.22}s">${x}</div>`).join('');
  for(let i=0;i<lines.length+nSk;i++)setTimeout(()=>{if(state==='over')SFX.ready();},1000+i*220);
  $('overContracts').innerHTML=(res.done.length?res.done.map(c=>`<div class="ct done"><span>✓ ${c.txt}</span><b>+${c.rw} ${lt('cr')}</b></div>`).join(''):'')+'<div class="ctitle">'+lt('nextContracts')+'</div>'+d.active.map(id=>`<div class="ct"><span>${ctTxt(id,cTarget(id))}</span><b>+${CREWARD[cTier(id)]} ${lt('cr')}</b></div>`).join('');
@@ -1775,15 +1810,19 @@ function gameOver(){
  show('sOver');$('sOver').scrollTop=0;R.overShown=performance.now();Platform.over(Math.round(r.score),r.sector);
  if(BOT){console.log('[BOT RESULT]',JSON.stringify({t:Math.round(r.t),sector:r.sector,level:r.level,score:Math.round(r.score),kills:r.kills,bosses:r.bossesKilled,perks:r.perks}));}
 }
+// per-level value of each permanent upgrade, for the 'now → next' preview
+const UPV={dmg:[8,'%'],rate:[6,'%'],hull:[15,''],xp:[8,'%'],reroll:[1,''],pulse:[15,'%'],kit:[1,'']};
+const upPrev=(u,lv)=>{const q=UPV[u.id];if(!q)return'';const f=n=>'+'+n*q[0]+q[1];return`<div class="uv">${lv>=u.max?'<b>'+f(lv)+'</b>':(lv?f(lv):'—')+' → <b>'+f(lv+1)+'</b>'}</div>`;};
+let justBought=null;
 function renderShop(){
- $('shopCr').textContent=lt('credits',{n:Save.d.credits});
+ $('shopCr').textContent=lt('credits',{n:Save.d.credits});{const c=$('shopCr');c.classList.remove('spent');if(justBought){void c.offsetWidth;c.classList.add('spent');}}
  $('shopList').innerHTML=UPGRADES.map(u=>{const lv=U(u.id),max=lv>=u.max,cost=max?0:u.cost[lv];
-  return`<div class="up"><div class="ub">${ico(u.id)||u.code}</div><div><div class="un">${upName(u)}</div><div class="ud">${upDesc(u)}</div>${pips(lv,u.max)}</div><button class="buy ${max?'max':''}" data-id="${u.id}" ${max||Save.d.credits<cost?'disabled':''}>${max?lt('maxed'):cost+' '+lt('cr')}</button></div>`;}).join('')
-  +'<div class="ctitle" style="margin-top:10px">'+lt('launchers')+'</div>'+LAUNCHERS.map(l=>{const own=owned(l.id),met=lchReqMet(l),eq=Save.d.launcher===l.id;return`<div class="cx ${!own&&!met?'lock':''}" style="--c:${l.col}"><div class="ub">${!own&&!met?l.name.slice(0,3):ico(l.id)||l.name.slice(0,3)}</div><div><div class="cn">${l.name}</div><div class="cd">${lDesc(l)}${!own&&!met?'<br><small>'+lt('unlockUp',{t:lReq(l)})+'</small>':''}</div></div><button class="lbtn ${own?'eq':''}" data-l="${l.id}" ${own?(eq?'disabled':''):(!met||Save.d.credits<l.cost?'disabled':'')}>${own?(eq?lt('equipped'):lt('equip')):met?l.cost+' '+lt('cr'):lt('locked')}</button></div>`;}).join('')
+  return`<div class="up ${justBought===u.id?'bought':''}"><div class="ub">${ico(u.id)||u.code}</div><div><div class="un">${upName(u)}</div><div class="ud">${upDesc(u)}</div>${upPrev(u,lv)}${pips(lv,u.max)}</div><button class="buy ${max?'max':''}" data-id="${u.id}" ${max||Save.d.credits<cost?'disabled':''}>${max?lt('maxed'):cost+' '+lt('cr')}</button></div>`;}).join('')
+  +'<div class="ctitle" style="margin-top:10px">'+lt('launchers')+'</div>'+LAUNCHERS.map(l=>{const own=owned(l.id),met=lchReqMet(l),eq=Save.d.launcher===l.id;return`<div class="cx ${!own&&!met?'lock':''} ${justBought==='l_'+l.id?'bought':''}" style="--c:${l.col}"><div class="ub">${!own&&!met?l.name.slice(0,3):ico(l.id)||l.name.slice(0,3)}</div><div><div class="cn">${l.name}</div><div class="cd">${lDesc(l)}${!own&&!met?'<br><small>'+lt('unlockUp',{t:lReq(l)})+'</small>':''}</div></div><button class="lbtn ${own?'eq':''}" data-l="${l.id}" ${own?(eq?'disabled':''):(!met||Save.d.credits<l.cost?'disabled':'')}>${own?(eq?lt('equipped'):lt('equip')):met?l.cost+' '+lt('cr'):lt('locked')}</button></div>`;}).join('')
   +'<div class="ctitle" style="margin-top:10px">'+lt('discSkins')+'</div><div class="skins">'+SKINS.map(sk=>{const un=skinUnlocked(sk),sel=un&&Save.d.skin===sk.id;return`<button class="skin ${sel?'sel':''}" data-skin="${sk.id}" ${un?'':'disabled'} style="--c:${sk.col}"><i></i><span>${sk.name}</span><em>${un?(sel?lt('equipped'):lt('equip')):skReq(sk)}</em></button>`;}).join('')+'</div>';
- $('shopList').querySelectorAll('.lbtn').forEach(b=>b.addEventListener('click',()=>{const l=LBY[b.dataset.l],d=Save.d;if(owned(l.id)){d.launcher=l.id;SFX.pick();}else{if(!lchReqMet(l)||d.credits<l.cost){SFX.deny();return;}d.credits-=l.cost;d.owned[l.id]=1;d.launcher=l.id;SFX.buy();const f=FEATS.find(x=>x.id==='arsenal');if(!d.ach.arsenal&&f.f(null,d)){d.ach.arsenal=1;d.credits+=f.cr;}}Save.save();renderShop();}));
- $('shopList').querySelectorAll('.skin').forEach(b=>b.addEventListener('click',()=>{Save.d.skin=b.dataset.skin;Save.save();SFX.pick();renderShop();}));
- $('shopList').querySelectorAll('.buy').forEach(b=>b.addEventListener('click',()=>{const u=UPGRADES.find(x=>x.id===b.dataset.id),lv=U(u.id);if(lv>=u.max||Save.d.credits<u.cost[lv]){SFX.deny();return;}Save.d.credits-=u.cost[lv];Save.d.up[u.id]=lv+1;Save.save();SFX.buy();renderShop();}));
+ $('shopList').querySelectorAll('.lbtn').forEach(b=>b.addEventListener('click',()=>{const l=LBY[b.dataset.l],d=Save.d;if(owned(l.id)){d.launcher=l.id;SFX.pick();}else{if(!lchReqMet(l)||d.credits<l.cost){SFX.deny();return;}d.credits-=l.cost;d.owned[l.id]=1;d.launcher=l.id;SFX.buy();justBought='l_'+l.id;const f=FEATS.find(x=>x.id==='arsenal');if(!d.ach.arsenal&&f.f(null,d)){d.ach.arsenal=1;d.credits+=f.cr;}}Save.save();renderShop();}));
+ $('shopList').querySelectorAll('.skin').forEach(b=>b.addEventListener('click',()=>{Save.d.skin=b.dataset.skin;Save.save();SFX.pick();renderShop();}));justBought=null;
+ $('shopList').querySelectorAll('.buy').forEach(b=>b.addEventListener('click',()=>{const u=UPGRADES.find(x=>x.id===b.dataset.id),lv=U(u.id);if(lv>=u.max||Save.d.credits<u.cost[lv]){SFX.deny();return;}Save.d.credits-=u.cost[lv];Save.d.up[u.id]=lv+1;Save.save();SFX.buy();justBought=u.id;renderShop();}));
 }
 function openShop(from){Sound.init();shopReturn=from;renderShop();show('sShop');SFX.ui();}
 function closeShop(){SFX.ui();if(shopReturn==='sOver'){show('sOver');$('overCr').textContent=crLine();$('bShop2').classList.toggle('alert',anyAffordable());}else{show('sMenu');refreshMenu();}}
