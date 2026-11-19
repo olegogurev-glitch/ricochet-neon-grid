@@ -165,6 +165,8 @@ h2.cy{text-shadow:0 0 12px var(--cyan),0 0 40px var(--cyan)}
 .selv b{font-family:var(--fd);font-size:clamp(12px,3.6vw,15px);letter-spacing:.1em;line-height:1.15;color:var(--c);text-shadow:0 0 10px var(--c);overflow-wrap:anywhere}
 .selv span{font-size:13px;color:#b9c1e0;font-weight:600;line-height:1.2}
 .selrow{display:grid;grid-template-columns:1.5fr 1fr;gap:8px}
+.lsel.fixed{grid-template-columns:1fr}
+.dhead{font-family:var(--fd);font-size:11px;letter-spacing:.24em;color:var(--amber);text-shadow:0 0 10px var(--amber);text-align:center}
 .mult{font-family:var(--fd);font-size:10px;letter-spacing:.18em;color:var(--amber);text-align:center;line-height:1.5}
 .mbtns{display:flex;gap:8px;width:min(86vw,360px)}
 .mbtns .btn{flex:1;width:auto;padding:12px 4px;font-size:12px;letter-spacing:.12em;min-width:0}
@@ -295,7 +297,32 @@ html.calm .logo::before,html.calm .logo::after,html.calm .rays::before,html.calm
 const $=id=>document.getElementById(id);
 const TAU=Math.PI*2,rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t;
 const ease=t=>1-Math.pow(1-clamp(t,0,1),3);
-const QS=new URLSearchParams(location.search),BOT=QS.has('bot'),GAME_SPEED=1.07,SPEED=GAME_SPEED*Math.max(0.1,+QS.get('speed')||1); // GAME_SPEED: global pace (+7%)
+const QS=new URLSearchParams(location.search),BOT=QS.has('bot'),GAME_SPEED=1.07,SPEED=GAME_SPEED*(BOT||QS.has('dev')?Math.max(0.1,+QS.get('speed')||1):1); // GAME_SPEED: global pace (+7%); ?speed only for the bot and dev builds
+// ?daily=DAY: Pixo's daily challenge (pixoarcade.com), the same run for every player that UTC day. The site picks &launcher=, &district= and
+// &twist= from the date (src/games.js, RIC_TWISTS, in this order); the run ignores Uplink upgrades and opens every augment, so no account has an edge.
+const DAY_OK=/^\d{4}-\d{2}-\d{2}$/;
+const TWISTS={
+ glass:{en:['GLASS CANNON','Discs deal +60% damage · integrity halved'],ru:['СТЕКЛЯННАЯ ПУШКА','Урон дисков +60% · прочность вдвое меньше'],zh:['玻璃大炮','飞盘伤害 +60% · 完整度减半'],tr:['CAM TOP','Disk hasarı +%60 · bütünlük yarıya iner']},
+ swarm:{en:['SWARM','50% more enemies · each has 35% less HP'],ru:['РОЙ','Врагов на 50% больше · у каждого на 35% меньше HP'],zh:['虫群','敌人数量 +50% · 每个敌人生命值 −35%'],tr:['SÜRÜ','%50 daha fazla düşman · her biri %35 daha az can']},
+ elite:{en:['ELITE HUNT','Elites from sector 2, twice as often'],ru:['ОХОТА НА ЭЛИТУ','Элита со 2-го сектора, вдвое чаще'],zh:['精英狩猎','精英从第 2 扇区出现，频率翻倍'],tr:['ELİT AVI','Elitler 2. sektörden itibaren, iki kat sık']},
+ banker:{en:['BANK SHOT','Wall-banked kills score ×3 instead of ×1.5'],ru:['РИКОШЕТ','Убийства рикошетом от стен дают ×3 очков вместо ×1,5'],zh:['反弹大师','墙壁反弹击杀得分 ×3（原为 ×1.5）'],tr:['BANKO ATIŞ','Duvar sekmesiyle öldürmeler ×1,5 yerine ×3 puan']},
+ headstart:{en:['HEAD START','Begin with two free augments'],ru:['ФОРА','Старт с двумя бесплатными аугментами'],zh:['抢先起步','开局获得两个免费强化'],tr:['ÖNDE BAŞLA','İki ücretsiz güçlendirmeyle başla']},
+ overclock:{en:['OVERCLOCK','Fire rate +40% · enemies 15% faster'],ru:['РАЗГОН','Скорострельность +40% · враги на 15% быстрее'],zh:['超频','射速 +40% · 敌人速度 +15%'],tr:['HIZ AŞIRTMA','Atış hızı +%40 · düşmanlar %15 daha hızlı']},
+};
+const DAILY=!BOT&&DAY_OK.test(QS.get('daily')||'')?{day:QS.get('daily'),launcher:QS.get('launcher')||'vector',district:QS.get('district')||'grid',twist:TWISTS[QS.get('twist')]?QS.get('twist'):null}:null;
+const DAILY_K=0.4; // the daily's fixed threat: between a fresh account (0) and a veteran (1), whoever plays
+const DT={
+ en:{daily:'DAILY CHALLENGE',dailyRules:'SAME RUN FOR EVERY PLAYER · NO UPLINK UPGRADES · EVERY AUGMENT OPEN',twist:'TWIST',todayBest:"TODAY'S BEST {n}",dailyNew:'NEW DAILY BEST'},
+ ru:{daily:'ИСПЫТАНИЕ ДНЯ',dailyRules:'ОДИН ЗАБЕГ ДЛЯ ВСЕХ · БЕЗ УЛУЧШЕНИЙ АПЛИНКА · ВСЕ АУГМЕНТЫ ОТКРЫТЫ',twist:'ОСОБЕННОСТЬ',todayBest:'ЛУЧШЕЕ ЗА ДЕНЬ {n}',dailyNew:'НОВЫЙ РЕКОРД ДНЯ'},
+ zh:{daily:'每日挑战',dailyRules:'所有玩家同一局 · 无上行链路升级 · 所有强化开放',twist:'变数',todayBest:'今日最佳 {n}',dailyNew:'新的今日最佳'},
+ tr:{daily:'GÜNLÜK MEYDAN OKUMA',dailyRules:'HERKES İÇİN AYNI KOŞU · GELİŞTİRME YOK · TÜM GÜÇLENDİRMELER AÇIK',twist:'DEĞİŞKEN',todayBest:'BUGÜNÜN EN İYİSİ {n}',dailyNew:'YENİ GÜNLÜK REKOR'},
+};
+const dt=(k,v)=>{let x=(DT[LANG]||DT.en)[k]||DT.en[k];if(v)x=x.replace(/\{(\w+)\}/g,(m,q)=>v[q]!=null?v[q]:m);return x;};
+const twName=k=>(TWISTS[k][LANG]||TWISTS[k].en)[0],twDesc=k=>(TWISTS[k][LANG]||TWISTS[k].en)[1];
+// Pixo runs the game in a frame and puts runs on its leaderboards ('score', or 'daily' with the day): tell it when a run starts and ends.
+// Nothing is posted when the game runs on its own, in ?bot or ?dev, or in the headless sim.
+const HOSTED=window.parent!==window&&!BOT&&!QS.has('dev');
+function pixoRun(type,data){if(!HOSTED)return;try{window.parent.postMessage(Object.assign({pixo:type,board:DAILY?'daily':'score'},DAILY&&type==='run-start'?{day:DAILY.day}:{},data||{}),location.origin);}catch(e){}}
 const fmt=n=>Math.round(n).toLocaleString(LOCALE[LANG]||'en-US');
 const fmtK=n=>n<1000?String(Math.ceil(n)):n<1e6?(n/1000).toFixed(n<1e4?1:0)+'k':(n/1e6).toFixed(1)+'M';
 const RGBC={};function rgb(h){if(RGBC[h])return RGBC[h];const n=parseInt(h.slice(1),16);return RGBC[h]=[n>>16&255,n>>8&255,n&255];}
@@ -877,6 +904,7 @@ const SECTOR_LEN=30,MAXP=900;
 const hpScale=m=>(1+0.5*m+0.13*m*m)*Math.pow(1.09,Math.max(0,m-4))*Math.pow(1.1,Math.max(0,m-8))*Math.pow(1.5,Math.max(0,m-9.5))*(1+0.06*Math.pow(Math.max(0,m-2),1.3));
 let XP_BASE=1;const xpFor=L=>Math.round(XP_BASE*(1+2.5*L+0.9*Math.pow(L,2.25)));
 const U=k=>Save.d.up[k]||0;
+let RUN_DAILY=null;const UR=k=>RUN_DAILY?0:U(k); // in-run upgrade level: 0 in a daily run
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
 function skinUnlocked(sk){const d=Save.d;switch(sk.req){case'sector':return d.bestSector>=sk.v;case'bosses':return d.bosses>=sk.v;case'contracts':return(d.cDone||0)>=sk.v;default:return true;}}
 const skinCol=()=>{const sk=SKINS.find(x=>x.id===Save.d.skin);return sk&&skinUnlocked(sk)?sk.col:COL.cyan;};
@@ -890,30 +918,34 @@ let state='menu',R=null,EID=0,WID=0;
 let discs=[],enemies=[],bullets=[],parts=[],rings=[],texts=[],bolts=[],shards=[],explQ=[],dnums=[],caps=[],bumpers=[];
 function newRun(demo,cfg){
  W=chooseW();layout();sprCache.clear();
- const C=demo?{launcher:'vector',district:'grid',heat:0}:(cfg||Save.d),Lc=LBY[C.launcher]&&(owned(C.launcher)||BOT)?LBY[C.launcher]:LBY.vector,Dc=DBY[C.district]&&(distUnlocked(DBY[C.district])||BOT)?DBY[C.district]:DBY.grid,hc=demo?0:clamp(C.heat||0,0,BOT?5:maxHeat(Dc.id));
+ const dly=demo?null:cfg?cfg.daily||null:DAILY;RUN_DAILY=dly; // __sim(secs,{daily:{launcher,district,twist}}) tries a daily in the bot
+ const C=demo?{launcher:'vector',district:'grid',heat:0}:dly?{launcher:dly.launcher,district:dly.district,heat:0}:(cfg||Save.d),Lc=LBY[C.launcher]&&(owned(C.launcher)||BOT||dly)?LBY[C.launcher]:LBY.vector,Dc=DBY[C.district]&&(distUnlocked(DBY[C.district])||BOT||dly)?DBY[C.district]:DBY.grid,hc=demo?0:clamp(C.heat||0,0,BOT?5:maxHeat(Dc.id));
  discs=[];enemies=[];bullets=[];parts=[];rings=[];texts=[];bolts=[];shards=[];explQ=[];dnums=[];caps=[];bumpers=[];ZA=ZONES[Dc.zone].a.slice();ZB=ZONES[Dc.zone].b.slice();
- setThreat(demo?0:adaptK());Sound.setZone(Dc.zone);
- const maxHp=Math.round((100+15*U('hull'))*(hc>=5?0.75:1));
- R={demo,L:Lc,D:Dc,heat:hc,hpMul:Dc.hp*(hc>=1?1.2:1)*(hc>=3?1.3:1)*(hc>=5?1.25:1),spdMul:Dc.spd*(hc>=2?1.12:1),eliteMul:Dc.eliteMul||1,bossSpd:hc>=4?1.2:1,scoreMul:1+0.25*hc,crMul:Dc.cr*(1+0.3*hc),seenE:new Set(),bossKinds:[],feats:[],featCr:0,dmgTaken:false,t:0,lootPicks:0,mode:'lvl',banishes:2,banned:new Set(),pw:{triple:0,mega:0,slow:0,over:0},capCd:8,ev:null,evT:rand(42,52),lastEv:'',volley:0,aegisT:6,sweep:0,assist:!demo&&!BOT,hitStop:0,hsCd:0,zp:0,score:0,kills:0,combo:0,comboT:0,comboPop:0,maxCombo:0,level:1,xp:0,xpNext:xpFor(1),xpGlow:0,hp:maxHp,maxHp,hurt:0,
+ setThreat(demo?0:dly?DAILY_K:adaptK());Sound.setZone(Dc.zone);
+ const maxHp=Math.round((100+15*UR('hull'))*(hc>=5?0.75:1));
+ R={demo,daily:!!dly,day:dly&&dly.day,twist:dly&&dly.twist||null,eliteFrom:Dc.eliteFrom||5,L:Lc,D:Dc,heat:hc,hpMul:Dc.hp*(hc>=1?1.2:1)*(hc>=3?1.3:1)*(hc>=5?1.25:1),spdMul:Dc.spd*(hc>=2?1.12:1),eliteMul:Dc.eliteMul||1,bossSpd:hc>=4?1.2:1,scoreMul:1+0.25*hc,crMul:Dc.cr*(1+0.3*hc),seenE:new Set(),bossKinds:[],feats:[],featCr:0,dmgTaken:false,t:0,lootPicks:0,mode:'lvl',banishes:2,banned:new Set(),pw:{triple:0,mega:0,slow:0,over:0},capCd:8,ev:null,evT:rand(42,52),lastEv:'',volley:0,aegisT:6,sweep:0,assist:!demo&&!BOT,hitStop:0,hsCd:0,zp:0,score:0,kills:0,combo:0,comboT:0,comboPop:0,maxCombo:0,level:1,xp:0,xpNext:xpFor(1),xpGlow:0,hp:maxHp,maxHp,hurt:0,
   sector:1,sectorT:0,boss:null,bossCount:0,bossesKilled:0,budget:0,nextType:null,formT:demo?12:0.9,opener:!demo,cacheT:rand(35,50),fireT:0.3,
-  aim:-Math.PI/2,aimT:-Math.PI/2,recoil:0,pulse:Math.min(1,U('pulse')*0.34),pulseWave:null,pulseReadyFx:0,perks:{},rerolls:1+U('reroll'),
-  pendingLevels:0,freePicks:demo?0:U('kit'),luDelay:demo?0:(U('kit')?0.6:0),ts:1,slowT:0,slowS:1,trauma:0,flash:0,flashCol:'#fff',glitch:0,
+  aim:-Math.PI/2,aimT:-Math.PI/2,recoil:0,pulse:Math.min(1,UR('pulse')*0.34),pulseWave:null,pulseReadyFx:0,perks:{},rerolls:1+U('reroll'),
+  pendingLevels:0,freePicks:demo?0:UR('kit'),luDelay:demo?0:(UR('kit')?0.6:0),ts:1,slowT:0,slowS:1,trauma:0,flash:0,flashCol:'#fff',glitch:0,
   banners:[],warnT:0,droneT:0,dieT:0,shown:0,hbT:0,hbPulse:0,cDone:[],cCr:0,cCheckT:0.5,bankKills:0,eliteKills:0,caches:0,pulseKills:0,dcol:demo?COL.cyan:skinCol(),tutT:Save.d.tut?0:7,lastAimMove:0,offer:null,luShown:0,dmgDealt:0,danger:0};
+ const tw=R.twist;if(tw==='glass')R.maxHp=R.hp=Math.round(R.maxHp*0.5);if(tw==='elite'){R.eliteFrom=2;R.eliteMul*=2;}if(tw==='overclock')R.spdMul*=1.15;if(tw==='headstart'){R.freePicks=2;R.luDelay=0.6;}
  recalc();
  if(Dc.bumpers)for(let i=0;i<Dc.bumpers;i++)bumpers.push({x:W*(i===0?0.28:0.72),y:470+(i?-40:40),r:26,f:0,t:rand(0,TAU),a:1,perm:true});
- if(!demo)banner(Dc.id==='grid'?lt('sector1'):dName(Dc),(hc?lt('heatN',{n:hc})+' · ':'')+(Dc.id==='grid'?lt('holdFw'):lt('sector1')),hc?COL.red:Dc.col,2.6);
+ if(dly)banner(dt('daily'),tw?twName(tw):dName(Dc),COL.amber,2.8);
+ else if(!demo)banner(Dc.id==='grid'?lt('sector1'):dName(Dc),(hc?lt('heatN',{n:hc})+' · ':'')+(Dc.id==='grid'?lt('holdFw'):lt('sector1')),hc?COL.red:Dc.col,2.6);
+ if(!demo&&!cfg)pixoRun('run-start');
  return R;
 }
 function recalc(){
  const L=k=>R.perks[k]||0,st={};
- st.dmg=10*(1+0.25*L('dmg')+0.08*U('dmg'))*(1+0.1*L('speed'));
- st.rate=3.4*(1+0.18*L('rate')+0.06*U('rate'));
+ st.dmg=10*(1+0.25*L('dmg')+0.08*UR('dmg'))*(1+0.1*L('speed'));
+ st.rate=3.4*(1+0.18*L('rate')+0.06*UR('rate'));
  st.speed=900*(1+0.12*L('speed'));st.bounces=3+L('bounce');st.size=9*(1+0.22*L('size'));
  st.multi=1+L('multi');st.pierce=L('pierce');st.crit=0.05+0.08*L('crit');st.critMult=2.2+0.15*L('crit');
- st.amp=0.22*L('amp');st.chill=L('chill');st.pulseRate=1+0.35*L('cap');st.pulseDmg=(1+0.3*L('cap'))*(1+0.15*U('pulse'));
+ st.amp=0.22*L('amp');st.chill=L('chill');st.pulseRate=1+0.35*L('cap');st.pulseDmg=(1+0.3*L('cap'))*(1+0.15*UR('pulse'));
  st.frag=L('frag');st.chain=L('chain');st.drones=L('drone');st.blast=L('blast');st.homing=L('homing');st.grid=L('grid');st.floor=L('floor');
- st.xpMult=(1+0.2*L('xp'))*(1+0.08*U('xp'));
- const M=R.L.m;st.dmg*=M.dmg||1;st.rate*=M.rate||1;st.speed*=M.speed||1;st.bounces+=M.bounce||0;st.size*=M.size||1;st.multi+=M.multi||0;st.pierce+=M.pierce||0;st.pulseRate*=M.pulseRate||1;st.pulseDmg*=M.pulseDmg||1;st.spread=M.spread||0.075;st.fireInt=1/st.rate;
+ st.xpMult=(1+0.2*L('xp'))*(1+0.08*UR('xp'));
+ const M=R.L.m;st.dmg*=M.dmg||1;st.rate*=M.rate||1;st.speed*=M.speed||1;st.bounces+=M.bounce||0;st.size*=M.size||1;st.multi+=M.multi||0;st.pierce+=M.pierce||0;st.pulseRate*=M.pulseRate||1;st.pulseDmg*=M.pulseDmg||1;st.spread=M.spread||0.075;if(R.twist==='glass')st.dmg*=1.6;if(R.twist==='overclock')st.rate*=1.4;st.fireInt=1/st.rate;
  st.evo={};EVOS.forEach(e=>{if(R.perks[e.id])st.evo[e.id.slice(2)]=1;});
  if(st.evo.loop)st.amp*=2;if(st.evo.rail){st.pierce=99;st.speed*=1.4;}
  st.look={frost:L('chill')>0,arc:L('chain')>0,spike:L('pierce')>0,gold:L('crit')>=2,heavy:L('dmg')>=3,evo:Object.keys(st.evo).length>0};
@@ -963,11 +995,11 @@ function banner(title,sub,col,dur=2.6,big=false){if(R.demo)return;R.banners.push
 // ---------------------------------------------------------------- spawning
 function spawnEnemy(type,x,y,o={}){
  const T=ET[type],m=diffM();
- const elite=o.elite??(type!=='mini'&&type!=='cache'&&R.sector>=(R.D.eliteFrom||5)&&Math.random()<Math.min(0.35,(0.04+0.006*R.sector)*R.eliteMul));
- const size=T.size*(elite?1.3:1),hp=T.hp*HP_BASE*hpScale(m)*(elite?2.8:1)*(o.hpMul||1)*R.hpMul;if(!R.demo)R.seenE.add(type);
+ const elite=o.elite??(type!=='mini'&&type!=='cache'&&R.sector>=R.eliteFrom&&Math.random()<Math.min(0.35,(0.04+0.006*R.sector)*R.eliteMul));
+ const size=T.size*(elite?1.3:1),hp=T.hp*HP_BASE*hpScale(m)*(elite?2.8:1)*(o.hpMul||1)*R.hpMul*(R.twist==='swarm'&&type!=='cache'?0.65:1);if(!R.demo)R.seenE.add(type);
  if(y==null)y=size+8;if(x==null){for(let k=0;k<8;k++){x=rand(size+8,W-size-8);let hit=false;for(const o of enemies){if(Math.abs(o.y-y)<o.size+size+4&&Math.abs(o.x-x)<o.size+size+4){hit=true;break;}}if(!hit)break;}}
  const e={id:++EID,type,T,x,y,bx:x,size,hp,maxHp:hp,spd:T.spd*SPD_BASE*Math.min(1.45,1+0.045*m)*(o.spdMul||1)*R.spdMul,elite,flash:0,slowT:0,t:0,ph:rand(0,TAU),rot:0,dead:false,phased:false,state:0,vx:0,fireT:rand(1,2.5),waveHit:0,shieldF:0,amp:rand(25,55),stopY:rand(170,H*0.42),timer:13,baseY:0,warp:o.warp??(type==='cache'?0:0.45)};e.warp0=e.warp||1;
- if(elite&&R.sector>=(R.D.eliteFrom||5)&&!R.demo){const tk=Object.keys(TRAITS);e.trait=tk[(Math.random()*tk.length)|0];if(e.trait==='haste')e.spd*=1.6;if(e.trait==='armor')e.armor=e.maxArmor=e.maxHp*0.4;}
+ if(elite&&R.sector>=R.eliteFrom&&!R.demo){const tk=Object.keys(TRAITS);e.trait=tk[(Math.random()*tk.length)|0];if(e.trait==='haste')e.spd*=1.6;if(e.trait==='armor')e.armor=e.maxArmor=e.maxHp*0.4;}
  if(type==='cache'){e.vx=(Math.random()<0.5?1:-1)*95;e.x=e.vx>0?-30:W+30;e.baseY=rand(120,260);e.y=e.baseY;}
  enemies.push(e);return e;
 }
@@ -979,7 +1011,7 @@ function formation(){
  else{const n=Math.floor((W-40)/70),sp=(W-40)/n,g1=(Math.random()*n)|0,g2=(Math.random()*n)|0;for(let i=0;i<n;i++)if(i!==g1&&i!==g2)spawnEnemy('node',20+sp*(i+0.5),30,{hpMul:0.8,elite:false});}
 }
 function spawner(dt){
- const m=diffM(),rate=(0.85+0.34*m+0.056*m*m)*(W/700)*(R.boss?0.2:1);
+ const m=diffM(),rate=(0.85+0.34*m+0.056*m*m)*(W/700)*(R.boss?0.2:1)*(R.twist==='swarm'?1.5:1);
  R.budget+=rate*dt;if(!R.nextType)R.nextType=pickType();
  let guard=0;while(R.budget>=ET[R.nextType].cost&&guard++<8){R.budget-=ET[R.nextType].cost;spawnEnemy(R.nextType);R.nextType=pickType();}
  if(!R.boss){R.formT-=dt;if(R.formT<=0){R.formT=rand(15,22);formation();}
@@ -1162,7 +1194,7 @@ function killEnemy(e,src){
  if(e.dead)return;e.dead=true;const T=e.T,m=diffM(),bank=!!(src&&src.walls>0&&!src.bolt);
  if(bank)R.bankKills++;if(src==='pulse')R.pulseKills++;if(e.elite)R.eliteKills++;if(e.type==='cache')R.caches++;
  R.kills++;R.combo++;R.comboT=2.2;R.comboPop=1;if(R.combo>R.maxCombo)R.maxCombo=R.combo;
- const ek=R.ev&&R.ev.k,pts=Math.round(T.sc*(e.elite?3:1)*comboMult()*(1+0.15*m)*(bank?1.5:1)*(ek==='gold'?2:1)*R.scoreMul);if(ek==='gold'&&Math.random()<0.2){R.bonusCr=(R.bonusCr||0)+1;ftext(e.x,e.y-6,lt('plusCr',{n:1}),EVENTS.gold.col,13,0.6,-60);}
+ const ek=R.ev&&R.ev.k,pts=Math.round(T.sc*(e.elite?3:1)*comboMult()*(1+0.15*m)*(bank?(R.twist==='banker'?3:1.5):1)*(ek==='gold'?2:1)*R.scoreMul);if(ek==='gold'&&Math.random()<0.2){R.bonusCr=(R.bonusCr||0)+1;ftext(e.x,e.y-6,lt('plusCr',{n:1}),EVENTS.gold.col,13,0.6,-60);}
  if(R.st.evo.loop&&src&&src.b!=null&&!src.bolt)src.b++;R.score+=pts;if(bank&&Math.random()<0.3)ftext(e.x,e.y-e.size-8,lt('bank'),R.dcol,13,0.55,-70);
  const xp=T.xp*(e.elite?3:1)*R.st.xpMult*(1+0.05*m)*(ek==='storm'?2:1);spawnShards(e.x,e.y,xp,Math.min(6,Math.ceil(T.xp*(e.elite?2:1))));
  const prev=R.pulse;R.pulse=Math.min(1,R.pulse+(e.elite?3:1)/(40*(1+0.4*m+0.066*m*m))*R.st.pulseRate);if(prev<1&&R.pulse>=1){SFX.ready();R.pulseReadyFx=1;if(!Save.d.pulseTut&&!R.demo){Save.d.pulseTut=1;Save.save();banner(lt('pulseReady'),touchUser?lt('tapPulse'):lt('spacePulse'),COL.amber,3);}}
@@ -1797,13 +1829,18 @@ function refreshMenu(){
  $('menuCr').textContent=crLine();$('bShop').classList.toggle('alert',anyAffordable());refreshToggles();
  ensureContracts();Save.save();
  $('menuContracts').innerHTML=d.runs?'<div class="ctitle">'+lt('contracts')+'</div>'+d.active.map(id=>`<div class="ct"><span>${ctTxt(id,cTarget(id))}</span><b>+${CREWARD[cTier(id)]} ${lt('cr')}</b></div>`).join(''):'';
- $('menuDaily').textContent=d.runs&&d.lastDay!==today()?lt('dailyReady'):'';
+ $('menuDaily').textContent=d.runs&&d.lastDay!==today()&&!DAILY?lt('dailyReady'):'';
  $('menuHint').style.display=d.runs>2?'none':'';
  renderLoadout();$('menuCodex').textContent=codexPct()+'%';
  {const g=d.runs?nextGoal():null;$('menuGoal').innerHTML=g?goalHTML(g):'';}
 }
 function renderLoadout(){
- const d=Save.d;if(!owned(d.launcher))d.launcher='vector';if(!DBY[d.district]||!distUnlocked(DBY[d.district]))d.district='grid';d.heat=clamp(d.heat||0,0,maxHeat(d.district));
+ const d=Save.d;
+ if(DAILY){const L=LBY[DAILY.launcher]||LBY.vector,D=DBY[DAILY.district]||DBY.grid,tw=DAILY.twist,db=d.dly&&d.dly.day===DAILY.day?d.dly.best:0;
+  const fx=(lab,name,desc,col)=>`<div class="lsel fixed" style="--c:${col}"><div class="selv"><small>${lab}</small><b>${name}</b>${desc?'<span>'+desc+'</span>':''}</div></div>`;
+  $('loadout').innerHTML=`<div class="dhead">◆ ${dt('daily')} · ${DAILY.day} ◆</div>`+fx(lt('launcher'),L.name,lDesc(L),L.col)+'<div class="selrow">'+fx(lt('district'),dName(D),'',D.col)+(tw?fx(dt('twist'),twName(tw),'','#ffb627'):'')+'</div>'
+   +`<div class="mult">${tw?twDesc(tw).toUpperCase()+'<br>':''}<span style="color:var(--dim)">${dt('dailyRules')}</span>${db?'<br>'+dt('todayBest',{n:fmt(db)}):''}</div>`;
+  return;}if(!owned(d.launcher))d.launcher='vector';if(!DBY[d.district]||!distUnlocked(DBY[d.district]))d.district='grid';d.heat=clamp(d.heat||0,0,maxHeat(d.district));
  const L=LBY[d.launcher],D=DBY[d.district],h=d.heat,nl=LAUNCHERS.filter(l=>owned(l.id)).length,nd=DISTRICTS.filter(distUnlocked).length,mh=maxHeat(d.district);
  const sel=(k,lab,name,desc,col,multi)=>`<div class="lsel" style="--c:${col}"><button class="arr" data-k="${k}" data-d="-1" ${multi?'':'disabled'}>◀</button><div class="selv"><small>${lab}</small><b>${name}</b>${desc?'<span>'+desc+'</span>':''}</div><button class="arr" data-k="${k}" data-d="1" ${multi?'':'disabled'}>▶</button></div>`;
  const mult=D.cr*(1+0.3*h),hl=[];for(let i=1;i<=h;i++)hl.push(heatTxt(i));
@@ -1866,8 +1903,8 @@ function rollPerks(n,minRar=0,evoChance=0.6,exclude=[]){
  const out=[],ex=new Set(exclude.map(p=>p.id));
  const evo=EVOS.filter(e=>!R.perks[e.id]&&e.cond()&&!R.banned.has(e.id)&&!ex.has(e.id));
  if(evo.length&&Math.random()<evoChance)out.push(evo[(Math.random()*evo.length)|0]);
- let pool=PERKS.filter(p=>perkUnlocked(p.id)&&p.rar>=minRar&&(R.perks[p.id]||0)<p.max&&(!p.cond||p.cond())&&!R.banned.has(p.id)&&!ex.has(p.id)&&!out.includes(p));
- if(pool.length<n-out.length&&minRar>0)pool=PERKS.filter(p=>perkUnlocked(p.id)&&(R.perks[p.id]||0)<p.max&&(!p.cond||p.cond())&&!R.banned.has(p.id)&&!ex.has(p.id)&&!out.includes(p));
+ let pool=PERKS.filter(p=>(R.daily||perkUnlocked(p.id))&&p.rar>=minRar&&(R.perks[p.id]||0)<p.max&&(!p.cond||p.cond())&&!R.banned.has(p.id)&&!ex.has(p.id)&&!out.includes(p));
+ if(pool.length<n-out.length&&minRar>0)pool=PERKS.filter(p=>(R.daily||perkUnlocked(p.id))&&(R.perks[p.id]||0)<p.max&&(!p.cond||p.cond())&&!R.banned.has(p.id)&&!ex.has(p.id)&&!out.includes(p));
  while(out.length<n&&pool.length){let tot=0;const w=pool.map(p=>{const x=RAR[p.rar].w*(p.rar===2?1+R.level*0.05:1)*(EVO_OF[p.id]&&R.perks[p.id]?1.35:1);tot+=x;return x;});let r=Math.random()*tot,i=0;for(;i<pool.length;i++){r-=w[i];if(r<=0)break;}out.push(pool.splice(Math.min(i,pool.length-1),1)[0]);}
  return out;
 }
@@ -1919,6 +1956,7 @@ function pauseGame(){if(state!=='play')return;state='paused';show('sPause');Plat
 function resumeGame(){if(state!=='paused')return;hideAll();state='play';Sound.resume();Platform.start();}
 function finalizeRun(){
  if(!R||R.demo||R.final)return null;R.final=true;checkContracts();
+ if(R.t>=12)pixoRun('run-end',{score:Math.round(R.score),wave:R.sector,detail:{sector:R.sector,level:R.level,bosses:R.bossesKilled,launcher:R.L.id,district:R.D.id,heat:R.heat}});
  const d=Save.d,r=R,newBest=r.score>d.best&&r.score>0,day=today(),daily=d.lastDay!==day&&r.t>=20;
  const gb={};goals().forEach(g=>gb[g.id]=g.cur);
  const skinsBefore=new Set(SKINS.filter(skinUnlocked).map(x=>x.id)),perksBefore=new Set(PERKS.filter(p=>perkUnlocked(p.id)).map(p=>p.id)),distBefore=new Set(DISTRICTS.filter(distUnlocked).map(x=>x.id)),heatBefore=maxHeat(r.D.id),lchBefore=new Set(LAUNCHERS.filter(lchReqMet).map(l=>l.id));
@@ -1927,7 +1965,8 @@ function finalizeRun(){
  d.credits+=cr+r.cCr;d.runs++;d.kills+=r.kills;d.bosses+=r.bossesKilled;d.best=Math.max(d.best,Math.round(r.score));d.bestSector=Math.max(d.bestSector,r.sector);d.bestLevel=Math.max(d.bestLevel,r.level);d.tut=1;
  {const sp=seenP();for(const id in r.perks)if(PERK_BY[id]&&PERK_BY[id].rar!==3)sp[id]=1;}
  for(const k of r.bossKinds)d.bk[k]=(d.bk[k]||0)+1;for(const k of r.seenE)d.seenE[k]=1;EVOS.forEach(e=>{if(r.perks[e.id])d.seenEvo[e.id]=1;});
- d.dBest[r.D.id]=Math.max(d.dBest[r.D.id]||0,r.sector);if(r.sector>=11)d.hb[r.D.id]=Math.max(d.hb[r.D.id]??-1,r.heat);
+ let dayBest=false;if(r.daily){const was=d.dly&&d.dly.day===r.day?d.dly.best:0;dayBest=r.score>was&&r.score>0;d.dly={day:r.day,best:Math.max(was,Math.round(r.score))};}
+ else{d.dBest[r.D.id]=Math.max(d.dBest[r.D.id]||0,r.sector);if(r.sector>=11)d.hb[r.D.id]=Math.max(d.hb[r.D.id]??-1,r.heat);}
  let fcr=r.featCr;for(const id of r.feats)d.ach[id]=1;const feats=r.feats.map(id=>FEATS.find(f=>f.id===id));
  for(const f of FEATS){if(!d.ach[f.id]&&f.f(null,d)){d.ach[f.id]=1;fcr+=f.cr;feats.push(f);}}
  d.credits+=fcr;
@@ -1937,15 +1976,15 @@ function finalizeRun(){
   ...(maxHeat(r.D.id)>heatBefore?[lt('heatUnl',{h:maxHeat(r.D.id),d:dName(r.D)})]:[]),
   ...LAUNCHERS.filter(l=>lchReqMet(l)&&!lchBefore.has(l.id)&&!owned(l.id)).map(l=>lt('lchAvail',{n:l.name}))];
  Save.save();
- return{cr,ccr:r.cCr,fcr,daily,newBest,done:r.cDone.slice(),newSkins,unl,feats,gb};
+ return{cr,ccr:r.cCr,fcr,daily,newBest,dayBest,done:r.cDone.slice(),newSkins,unl,feats,gb};
 }
 function gameOver(){
  state='over';const res=finalizeRun()||{cr:0,ccr:0,fcr:0,daily:false,newBest:false,done:[],newSkins:[],unl:[],feats:[]};const d=Save.d,r=R;
- const rec=$('overRecord');rec.textContent=res.newBest?lt('newHigh'):lt('best',{n:fmt(d.best)});rec.style.animation=res.newBest?'':'none';rec.style.opacity=res.newBest?'':'0.7';
+ const rec=$('overRecord'),hi=r.daily?res.dayBest:res.newBest;rec.textContent=r.daily?(res.dayBest?dt('dailyNew'):dt('todayBest',{n:fmt(d.dly?d.dly.best:0)})):res.newBest?lt('newHigh'):lt('best',{n:fmt(d.best)});rec.style.animation=hi?'':'none';rec.style.opacity=hi?'':'0.7';
  // score and credits count up together; unlock lines then pop in one by one with a chime each
  const target=Math.round(r.score),crT=res.cr+res.ccr+res.fcr,crSuf=(res.daily?' · '+lt('daily2'):'')+(r.crMul>1.001?' · ×'+r.crMul.toFixed(2):''),t0=performance.now();
  (function up(){const k=Math.min(1,(performance.now()-t0)/900),e=k<1&&state==='over'?ease(k):1;$('overScore').textContent=fmt(target*e);$('overEarn').textContent=lt('earned',{n:fmt(crT*e)})+crSuf;if(e<1)requestAnimationFrame(up);})();
- if(res.newBest)setTimeout(()=>{if(state==='over')SFX.legend();},900);
+ if(hi)setTimeout(()=>{if(state==='over')SFX.legend();},900);
  const mm=Math.floor(r.t/60),ss=String(Math.floor(r.t%60)).padStart(2,'0');
  $('overGrid').innerHTML=[['gSector',r.sector],['gLevel',r.level],['gKills',fmt(r.kills)],['gCombo',r.maxCombo],['gBosses',r.bossesKilled],['gTime',mm+':'+ss],['gLauncher',r.L.name],['gDistrict',dName(r.D)+(r.heat?' · '+r.heat:'')]].map(([k,v],i)=>`<div${i>=6?' class="wide"':''}>${lt(k)}<b>${v}</b></div>`).join('');
  const lines=[...res.feats.map(f=>lt('featLine',{n:UPC(ftName(f)),c:f.cr})),...res.unl],nSk=res.newSkins.length?1:0;
