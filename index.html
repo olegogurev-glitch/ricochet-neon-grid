@@ -600,7 +600,15 @@ const bl1=document.createElement('canvas'),bl2=document.createElement('canvas'),
 const bgC=document.createElement('canvas'),bgG=bgC.getContext('2d');
 const sprCache=new Map();
 const view={pauseBtn:{x:0,y:0,w:0,h:0},xpTarget:{x:0,y:0}};
-function readSafe(){const cs=getComputedStyle($('safe'));SAFE_T=parseFloat(cs.paddingTop)||0;SAFE_B=parseFloat(cs.paddingBottom)||0;}
+function readSafe(){const cs=getComputedStyle($('safe'));SAFE_T=parseFloat(cs.paddingTop)||0;SAFE_B=parseFloat(cs.paddingBottom)||0;
+ // Chrome reports safe-area insets as 0 inside an iframe, so a portal that fullscreens the game's iframe put the HUD under the
+ // phone's camera cutout. Only then does the frame cover the whole screen: read the insets from the (same-origin) parent page instead.
+ if(window.parent===window||Math.max(innerWidth,innerHeight)<Math.max(screen.width,screen.height)-2)return;
+ let t=0,b=0;
+ try{const d=parent.document,p=d.createElement('div');p.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+  d.body.appendChild(p);const c=d.defaultView.getComputedStyle(p);t=parseFloat(c.paddingTop)||0;b=parseFloat(c.paddingBottom)||0;p.remove();}
+ catch(e){if(innerHeight>innerWidth&&matchMedia('(pointer:coarse)').matches)t=28;} // cross-origin portal: assume a typical status-bar cutout
+ SAFE_T=Math.max(SAFE_T,t);SAFE_B=Math.max(SAFE_B,b);}
 function chooseW(){
  const portrait=SW/SH<1.1;
  // portrait floor 500 (was 600): tall phones get a field that fills the height instead of a letterboxed square
@@ -609,7 +617,7 @@ function chooseW(){
 }
 function layout(){
  PORTRAIT=SW/SH<1.1;
- if(PORTRAIT){const top=Math.max(62,SH*0.08)+SAFE_T,bot=Math.max(14,SH*0.02)+SAFE_B;const aw=SW-16,ah=SH-top-bot;S=Math.min(aw/W,ah/H);OX=(SW-W*S)/2;OY=top+(ah-H*S)/2;}
+ if(PORTRAIT){const top=Math.max(62,SH*0.08)+SAFE_T,bot=Math.max(14,SH*0.02)+SAFE_B;const aw=SW-16,ah=SH-top-bot;S=Math.min(aw/W,ah/H);OX=(SW-W*S)/2;const ex=ah-H*S;OY=top+ex-Math.max(0,ex-48)/2;} // spare height goes above the field first, so the launcher sits at the bottom edge and the HUD clears the status bar
  else{const ah=SH-24;S=Math.min(ah/H,(SW-300)/W);OX=(SW-W*S)/2;OY=(SH-H*S)/2;}
  HK=clamp(10.5/(11*S),1,1.5); // in-field HUD labels are in world units; grow them when the field is drawn small
 }
@@ -2002,7 +2010,9 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{const k=e.key;if(k==='ArrowLeft'||k==='a'||k==='A')keys.left=false;if(k==='ArrowRight'||k==='d'||k==='D')keys.right=false;});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(state==='play')pauseGame();Sound.suspend();}else if(state!=='play'||!document.hidden)Sound.resume();});
 addEventListener('blur',()=>{if(state==='play'&&!BOT)pauseGame();});
-addEventListener('resize',()=>{const was=PORTRAIT;resize();if(state==='play'&&was!==PORTRAIT)pauseGame();});
+let safeTO=0;
+addEventListener('resize',()=>{const was=PORTRAIT;resize();if(state==='play'&&was!==PORTRAIT)pauseGame();
+ clearTimeout(safeTO);safeTO=setTimeout(()=>{const t=SAFE_T,b=SAFE_B;readSafe();if(t!==SAFE_T||b!==SAFE_B)resize();},350);}); // entering fullscreen can report the cutout insets a moment after the resize
 
 // ---------------------------------------------------------------- main loop
 let lastNow=performance.now(),slowAcc=0,slowCnt=0;
